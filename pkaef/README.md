@@ -1,4 +1,4 @@
-# 🧠 PeopleDesk BA Workspace
+# 🧠 PeopleDesk Knowledge-Driven AI Engineering Framework (PKAEF)
 
 ### How PeopleDesk works, how we engineer it, and where we are taking it
 
@@ -7,7 +7,7 @@
 [![Updated](https://img.shields.io/badge/updated-2026--07-informational?style=flat-square)](#)
 
 > [!NOTE]
-> This is the **single entry point** for the PeopleDesk BA Workspace concept. It is a complete high-level overview on its own — architecture, engineering approach, and the transformation journey (past → present → future). Detailed documents will be added in subfolders as the concept evolves; this page will always remain the map.
+> This is the **single entry point** for the **PeopleDesk Knowledge-Driven AI Engineering Framework (PKAEF)** concept. It is a complete high-level overview on its own — architecture, engineering approach, and the transformation journey (past → present → future). Detailed documents will be added in subfolders as the concept evolves; this page will always remain the map.
 
 ---
 
@@ -23,7 +23,7 @@ The product is one system built from five repositories:
 | `app-front` | Frontend | React + TypeScript, Vite, Redux |
 | `app-report-api` | Reporting | .NET reporting service |
 | `app-scheduler-api` | Background jobs | .NET scheduler service |
-| `peopledesk-business-ai` | **BA Workspace** | Markdown-only AI workspace: Knowledge Base, modes, skills, templates |
+| `peopledesk-business-ai` | **AI Workspace (PKAEF home)** | Markdown-only AI workspace: Knowledge Base, modes, skills, templates |
 
 ```mermaid
 flowchart TB
@@ -36,7 +36,7 @@ subgraph Product["PeopleDesk Product"]
     DB[(SQL Server)]
 end
 
-subgraph AI["BA Workspace (AI Engineering Platform)"]
+subgraph AI["PKAEF — Knowledge-Driven AI Engineering Framework"]
     BAI[peopledesk-business-ai]
     KB[(Knowledge Base<br/>12 layers)]
 end
@@ -62,7 +62,7 @@ style Product fill:#2563EB14,stroke:#2563EB
 style AI fill:#7C3AED14,stroke:#7C3AED
 ```
 
-The **BA Workspace** is the fifth repository's purpose: an AI-driven workspace that understands the whole product through a structured **Knowledge Base** and turns business requirements into analyses, specifications, and developer-ready tasks — grounded in how the system *actually* works.
+**PKAEF** is what the fifth repository implements: a knowledge-driven AI engineering framework that understands the whole product through a structured **Knowledge Base** and turns business requirements into analyses, specifications, and developer-ready tasks — grounded in how the system *actually* works.
 
 ---
 
@@ -305,7 +305,7 @@ Phases advance on **evidence, not calendar**: knowledge coverage and confidence 
 This page stays the high-level map. As the concept matures, detail lands in subfolders — for example:
 
 ```text
-peopledesk-ba-workspace/
+pkaef/
 ├── README.md          ← this overview (always the entry point)
 ├── diagrams/          ← detailed diagrams, when needed
 ├── planning/          ← roadmap detail, milestones, research notes

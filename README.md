@@ -25,7 +25,7 @@ The homepage you are reading stays deliberately small: it only tells you what ex
 
 | Concept | What it covers | Entry point |
 |---------|----------------|-------------|
-| 🧠 **PeopleDesk BA Workspace** | How the PeopleDesk platform works, our architecture and engineering approach, and the transformation journey — past, present, and future | **[Open the overview →](peopledesk-ba-workspace/README.md)** |
+| 🧠 **PeopleDesk Knowledge-Driven AI Engineering Framework (PKAEF)** | How the PeopleDesk platform works, our architecture and engineering approach, and the transformation journey — past, present, and future | **[Open the overview →](pkaef/README.md)** |
 
 > More concepts (e.g. a Medical Project, a database design, a business process) will appear here as new top-level folders, each with its own entry point.
 
