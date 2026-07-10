@@ -75,7 +75,7 @@ In practice:
 
 ### 3.1 Past — where we came from
 
-Traditional multi-team delivery: every requirement crossed five specialized teams in sequence.
+Traditional multi-team delivery: every requirement moved through a sequential pipeline of specialized teams and environments — with QA bounce-backs restarting the cycle.
 
 ```mermaid
 flowchart TB
