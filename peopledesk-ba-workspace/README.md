@@ -49,6 +49,17 @@ SCH --> DB
 BAI --> KB
 BAI -.reads source.-> Product
 BAI -.read-only.-> DB
+
+classDef env fill:#2563EB,stroke:#1E40AF,color:#FFFFFF
+classDef ai fill:#7C3AED,stroke:#5B21B6,color:#FFFFFF
+classDef kb fill:#0D9488,stroke:#0F766E,color:#FFFFFF
+classDef db fill:#64748B,stroke:#475569,color:#FFFFFF
+class FE,API,RPT,SCH env
+class DB db
+class BAI ai
+class KB kb
+style Product fill:#2563EB14,stroke:#2563EB
+style AI fill:#7C3AED14,stroke:#7C3AED
 ```
 
 The **BA Workspace** is the fifth repository's purpose: an AI-driven workspace that understands the whole product through a structured **Knowledge Base** and turns business requirements into analyses, specifications, and developer-ready tasks — grounded in how the system *actually* works.
@@ -80,6 +91,9 @@ Three stages — and the difference between them is **who orchestrates**:
 | **3.1 Past** | AI assisted every team — business, product, BA, frontend, backend, QA | Traditional collaboration; humans coordinated everything manually |
 | **3.2 Present** | One **AI Workspace** orchestrates the complete lifecycle, grounded in the Knowledge Base | Humans decide at explicit approval gates |
 | **3.3 Future** | Customer requests automatically initiate the engineering pipeline | Humans govern a closed, self-improving loop |
+
+> [!NOTE]
+> **Color legend for all diagrams:** 🟣 purple = AI-executed · 🟠 amber = human decision / approval · 🩵 teal = knowledge · 🔵 blue = environments & infrastructure · 🟢 green = delivered / live.
 
 ### 3.1 Past — AI-assisted teams, manual orchestration
 
@@ -122,6 +136,18 @@ QA -->|passed| UATA
 UATA -->|approved| UAT
 UAT --> PRODA
 PRODA -->|approved| PROD
+
+classDef ai fill:#7C3AED,stroke:#5B21B6,color:#FFFFFF
+classDef human fill:#F59E0B,stroke:#B45309,color:#1F2937
+classDef env fill:#2563EB,stroke:#1E40AF,color:#FFFFFF
+classDef ops fill:#64748B,stroke:#475569,color:#FFFFFF
+classDef live fill:#16A34A,stroke:#15803D,color:#FFFFFF
+class BP,BA,FE,BE,QA ai
+class CI ops
+class TEST,UAT env
+class UATA,PRODA human
+class PROD live
+style DEV fill:#7C3AED14,stroke:#7C3AED
 ```
 
 Deployment followed a fixed rhythm: the **Testing Environment deployed automatically** from CI, while **UAT** and **Production** each required an explicit **approval**.
@@ -157,6 +183,18 @@ end
 REQ --> IA
 KB <-->|single source of truth| WS
 KBU -->|approval-gated merge| KB
+
+classDef ai fill:#7C3AED,stroke:#5B21B6,color:#FFFFFF
+classDef human fill:#F59E0B,stroke:#B45309,color:#1F2937
+classDef kb fill:#0D9488,stroke:#0F766E,color:#FFFFFF
+classDef live fill:#16A34A,stroke:#15803D,color:#FFFFFF
+classDef input fill:#64748B,stroke:#475569,color:#FFFFFF
+class IA,SPEC,TASK,IMPL,VER,PR,AIPR ai
+class HA,EXP,HCR,MA human
+class DEL live
+class KF,KBU,KB kb
+class REQ input
+style WS fill:#7C3AED14,stroke:#7C3AED
 ```
 
 Every pull request passes a **dual review** before it can merge:
@@ -170,6 +208,15 @@ And when the Knowledge Base Update lands, one full turn of the lifecycle is comp
 flowchart LR
 
 KB[(Knowledge Base)] --> WS[AI Workspace] --> DEV[Development] --> REV[Review] --> DEL[Delivery] --> KF[Knowledge Feedback] --> KB
+
+classDef ai fill:#7C3AED,stroke:#5B21B6,color:#FFFFFF
+classDef human fill:#F59E0B,stroke:#B45309,color:#1F2937
+classDef kb fill:#0D9488,stroke:#0F766E,color:#FFFFFF
+classDef live fill:#16A34A,stroke:#15803D,color:#FFFFFF
+class WS,DEV ai
+class REV human
+class DEL live
+class KB,KF kb
 ```
 
 **Live today:** knowledge-driven analysis and specification, impact analysis before every change, duplicate-feature detection, honest coverage reporting, and approval-gated knowledge sync. **Piloting:** AI-assisted implementation with automatic AI PR review in the product repositories, under human merge approval.
@@ -204,6 +251,17 @@ A4 -->|approved| WS["🧠 AI Workspace pipeline<br/>executes the complete Sectio
 B4 -->|approved| WS
 WS --> KB[(Knowledge Base)]
 KB -->|smarter next request| AIRA
+
+classDef ai fill:#7C3AED,stroke:#5B21B6,color:#FFFFFF
+classDef human fill:#F59E0B,stroke:#B45309,color:#1F2937
+classDef kb fill:#0D9488,stroke:#0F766E,color:#FFFFFF
+classDef env fill:#2563EB,stroke:#1E40AF,color:#FFFFFF
+class CUST,PORTAL env
+class AIRA,TYPE,A1,A2,B1,B2,B3,WS ai
+class A3,A4,B4 human
+class KB kb
+style OPTA fill:#7C3AED14,stroke:#7C3AED
+style OPTB fill:#7C3AED14,stroke:#7C3AED
 ```
 
 The defining property: **every approved request — new feature or fix — enters the same standardized AI Workspace pipeline defined in Section 3.2.** There is one way software gets built, and the platform is fully self-improving: each delivery updates the Knowledge Base, and the updated knowledge sharpens the next requirement analysis.
@@ -221,6 +279,13 @@ P1[Phase 1<br/>Knowledge Foundation] --> P2[Phase 2<br/>Knowledge-Driven Analysi
 P2 --> P3[Phase 3<br/>AI-Assisted Implementation]
 P3 --> P4[Phase 4<br/>Single Engineer Model]
 P4 --> P5[Phase 5<br/>Supervised Autonomy]
+
+classDef live fill:#16A34A,stroke:#15803D,color:#FFFFFF
+classDef pilot fill:#F59E0B,stroke:#B45309,color:#1F2937
+classDef future fill:#64748B,stroke:#475569,color:#FFFFFF
+class P1,P2 live
+class P3 pilot
+class P4,P5 future
 ```
 
 | Phase | Theme | Status |
