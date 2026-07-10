@@ -73,57 +73,142 @@ In practice:
 
 ## 3. The journey
 
-### 3.1 Past — where we came from
+Three stages — and the difference between them is **who orchestrates**:
 
-Traditional multi-team delivery: every requirement moved through a sequential pipeline of specialized teams and environments — with QA bounce-backs restarting the cycle.
+| Stage | AI's role | Orchestration |
+|-------|-----------|---------------|
+| **3.1 Past** | AI assisted every team — business, product, BA, frontend, backend, QA | Traditional collaboration; humans coordinated everything manually |
+| **3.2 Present** | One **AI Workspace** orchestrates the complete lifecycle, grounded in the Knowledge Base | Humans decide at explicit approval gates |
+| **3.3 Future** | Customer requests automatically initiate the engineering pipeline | Humans govern a closed, self-improving loop |
 
-```mermaid
-flowchart TB
+### 3.1 Past — AI-assisted teams, manual orchestration
 
-A[Business Analyst / Product Owner] --> B[Development]
-B --> C[Build + CI Pipeline<br/>DevOps]
-C --> D[Deploy to Test Environment]
-D --> E[Automated + Manual QA]
-E --> F{Bugs Found?}
-F -->|Yes| B
-F -->|Passed| G[Deploy to Staging]
-G --> H[UAT<br/>optional]
-H --> I[Deploy to Production<br/>DevOps]
-I --> J[Monitoring & Feedback]
-```
+AI was never limited to development — it supported **every stage of the software lifecycle**. What made this the "past" is not the absence of AI, but that each team used AI **separately**, connected by traditional collaboration and manual orchestration:
 
-It worked — but every arrow was a handoff, and every handoff meant queue time, coordination meetings, and knowledge loss. Product knowledge lived in people's heads and scattered documents, and every estimate or bug fix paid a "rediscovery tax": someone re-reading code or finding the person who remembered.
-
-### 3.2 Present — where we are today
-
-The **Knowledge-Driven AI Engineering Platform (v2)** is operating now. The product has been reverse-engineered into the Knowledge Base, and requirements flow through a knowledge-grounded loop instead of a team pipeline:
+- **Business & Product Team** — AI-assisted requirement analysis and documentation
+- **Business Analyst (BA)** — AI-assisted specification and requirement refinement
+- **Frontend Development** — AI-assisted implementation
+- **Backend Development** — AI-assisted implementation
+- **QA / Testing** — AI-assisted testing and validation
 
 ```mermaid
 flowchart TB
 
-A[Business Requirement] --> B[AI Workspace]
-B <--> C[(Knowledge Base)]
-B --> D[Impact Analysis]
-D --> E{Human Approval}
-E --> F[Specification<br/>Business Doc + Developer Task]
-F --> G[AI-Assisted Implementation<br/>on explicit request]
-G --> H[Verification]
-H --> I{Human Review}
-I --> J[Delivered]
-I --> K[Knowledge Feedback]
-K --> C
+BP["Business & Product Team<br/>🤖 AI-assisted requirement analysis & documentation"]
+BA["Business Analyst<br/>🤖 AI-assisted specification & requirement refinement"]
+
+subgraph DEV[Development]
+    FE["Frontend<br/>🤖 AI-assisted implementation"]
+    BE["Backend<br/>🤖 AI-assisted implementation"]
+end
+
+CI["Build + CI Pipeline<br/>DevOps"]
+TEST["Testing Environment<br/>automatic deployment"]
+QA["QA / Testing<br/>🤖 AI-assisted testing & validation"]
+UATA{Approval}
+UAT[UAT Environment]
+PRODA{Approval}
+PROD[Production Environment]
+
+BP --> BA
+BA --> FE
+BA --> BE
+FE --> CI
+BE --> CI
+CI -->|automatic| TEST
+TEST --> QA
+QA -->|bugs found| DEV
+QA -->|passed| UATA
+UATA -->|approved| UAT
+UAT --> PRODA
+PRODA -->|approved| PROD
 ```
 
-**Live today:** knowledge-driven analysis and specification, impact analysis before every change, duplicate-feature detection, honest coverage reporting, and approval-gated knowledge sync. **Piloting:** AI-assisted implementation in the product repositories under human review.
+Deployment followed a fixed rhythm: the **Testing Environment deployed automatically** from CI, while **UAT** and **Production** each required an explicit **approval**.
 
-### 3.3 Future — where we are going
+The gaps were *between* the stages, not inside them: every handoff meant queue time, coordination meetings, and knowledge loss. Each team's AI started from zero context, product knowledge lived in people's heads and scattered documents, and every estimate or bug fix paid a "rediscovery tax" — someone re-reading code or finding the person who remembered.
 
-Two destinations, reached incrementally:
+### 3.2 Present — one AI Workspace orchestrates the lifecycle
 
-1. **The Single Engineer Model** — one engineer, amplified by the workspace, owns a change end-to-end (analysis, backend, frontend, tests, docs). Specialists move up the stack to governance and review.
-2. **Supervised autonomy** — for bounded, low-risk change classes, the AI operates the loop while humans govern policies and audit outcomes. Approval gates never disappear; they move from artifacts up to policies.
+The **Knowledge-Driven AI Engineering Platform (v2)** is operating now. The disconnected, per-team AI of the past is replaced by a **single AI Workspace** that orchestrates the complete engineering process — grounded in the Knowledge Base as its single source of truth, and gated by explicit human decisions:
 
-Beyond engineering, the same Knowledge Base will power new surfaces — first among them a **Customer Support AI** that answers from the same source of truth the engineers use, so what support says and what the product does can never drift apart.
+```mermaid
+flowchart TB
+
+REQ[Business Requirement]
+KB[(Knowledge Base<br/>12 layers)]
+
+subgraph WS["🧠 AI WORKSPACE — one orchestrator for the complete lifecycle"]
+    IA[Impact Analysis] --> HA{Human Approval}
+    HA --> SPEC[Specification Generation]
+    SPEC --> TASK[Developer Task Preparation]
+    TASK --> EXP{"Explicit AI<br/>Implementation Request"}
+    EXP --> IMPL[AI Implementation]
+    IMPL --> VER["Verification<br/>build + prescribed tests"]
+    VER --> HCR[Human Code Review]
+    HCR --> PR[Pull Request Creation]
+    PR --> AIPR["Automatic AI PR Review<br/>coding standards · architecture compliance · implementation quality"]
+    AIPR --> MA{"Merge Approval<br/>final human review"}
+    MA --> DEL[Delivery]
+    DEL --> KF[Knowledge Feedback]
+    KF --> KBU[Knowledge Base Update]
+end
+
+REQ --> IA
+KB <-->|single source of truth| WS
+KBU -->|approval-gated merge| KB
+```
+
+Every pull request passes a **dual review** before it can merge:
+
+1. **AI reviews automatically** the moment the PR is created — validating coding standards, checking architecture compliance, and verifying implementation quality.
+2. **A human performs the final review** — merge approval always remains a human decision.
+
+And when the Knowledge Base Update lands, one full turn of the lifecycle is complete. The same cycle then repeats for the next request — starting from a smarter Knowledge Base:
+
+```mermaid
+flowchart LR
+
+KB[(Knowledge Base)] --> WS[AI Workspace] --> DEV[Development] --> REV[Review] --> DEL[Delivery] --> KF[Knowledge Feedback] --> KB
+```
+
+**Live today:** knowledge-driven analysis and specification, impact analysis before every change, duplicate-feature detection, honest coverage reporting, and approval-gated knowledge sync. **Piloting:** AI-assisted implementation with automatic AI PR review in the product repositories, under human merge approval.
+
+### 3.3 Future — customer-support-driven AI engineering
+
+The destination is an **autonomous, knowledge-driven engineering platform**: customer requests automatically initiate AI-powered requirement analysis, proposal generation, approval workflows, implementation, verification, deployment, and continuous knowledge evolution — one closed engineering loop.
+
+```mermaid
+flowchart TB
+
+CUST[Customer] --> PORTAL[Customer Support Portal]
+PORTAL --> AIRA[AI Requirement Analysis]
+AIRA --> TYPE{Request type?}
+
+subgraph OPTA["Option A — New Feature"]
+    A1[AI analyzes the requirement] --> A2[AI prepares a proposal]
+    A2 --> A3[Business Analyst reviews the proposal]
+    A3 --> A4{Human Approval}
+end
+
+subgraph OPTB["Option B — Existing Feature · Bug · Enhancement"]
+    B1[AI identifies the root cause] --> B2[AI analyzes the existing implementation]
+    B2 --> B3[AI prepares a solution proposal]
+    B3 --> B4{"Human Review & Approval"}
+end
+
+TYPE -->|new feature| A1
+TYPE -->|existing · bug · enhancement| B1
+
+A4 -->|approved| WS["🧠 AI Workspace pipeline<br/>executes the complete Section 3.2 lifecycle"]
+B4 -->|approved| WS
+WS --> KB[(Knowledge Base)]
+KB -->|smarter next request| AIRA
+```
+
+The defining property: **every approved request — new feature or fix — enters the same standardized AI Workspace pipeline defined in Section 3.2.** There is one way software gets built, and the platform is fully self-improving: each delivery updates the Knowledge Base, and the updated knowledge sharpens the next requirement analysis.
+
+The stepping stones remain the **Single Engineer Model** (one engineer supervising the workspace end-to-end) and **supervised autonomy** (AI operating bounded change classes while humans govern policies and audit outcomes). Approval gates never disappear — they move up from individual artifacts to policies.
 
 ---
 
