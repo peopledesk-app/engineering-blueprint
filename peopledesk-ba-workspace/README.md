@@ -78,7 +78,7 @@ In practice:
 Traditional multi-team delivery: every requirement crossed five specialized teams in sequence.
 
 ```mermaid
-flowchart LR
+flowchart TB
 
 A[Customer Requirement] --> B[Business Analyst Team]
 B --> C[Backend Development]
@@ -97,7 +97,7 @@ It worked — but every arrow was a handoff, and every handoff meant queue time,
 The **Knowledge-Driven AI Engineering Platform (v2)** is operating now. The product has been reverse-engineered into the Knowledge Base, and requirements flow through a knowledge-grounded loop instead of a team pipeline:
 
 ```mermaid
-flowchart LR
+flowchart TB
 
 A[Business Requirement] --> B[AI Workspace]
 B <--> C[(Knowledge Base)]
@@ -128,7 +128,7 @@ Beyond engineering, the same Knowledge Base will power new surfaces — first am
 ## 4. Transformation roadmap
 
 ```mermaid
-flowchart LR
+flowchart TB
 
 P1[Phase 1<br/>Knowledge Foundation] --> P2[Phase 2<br/>Knowledge-Driven Analysis]
 P2 --> P3[Phase 3<br/>AI-Assisted Implementation]
