@@ -80,14 +80,16 @@ Traditional multi-team delivery: every requirement crossed five specialized team
 ```mermaid
 flowchart TB
 
-A[Customer Requirement] --> B[Business Analyst Team]
-B --> C[Backend Development]
-B --> D[Frontend Development]
-C --> E[SQA Team]
-D --> E
-E --> F[DevOps Team]
-F --> G[Testing Environment]
-G --> H[Production]
+A[Business Analyst / Product Owner] --> B[Development]
+B --> C[Build + CI Pipeline<br/>DevOps]
+C --> D[Deploy to Test Environment]
+D --> E[Automated + Manual QA]
+E --> F{Bugs Found?}
+F -->|Yes| B
+F -->|Passed| G[Deploy to Staging]
+G --> H[UAT<br/>optional]
+H --> I[Deploy to Production<br/>DevOps]
+I --> J[Monitoring & Feedback]
 ```
 
 It worked — but every arrow was a handoff, and every handoff meant queue time, coordination meetings, and knowledge loss. Product knowledge lived in people's heads and scattered documents, and every estimate or bug fix paid a "rediscovery tax": someone re-reading code or finding the person who remembered.
