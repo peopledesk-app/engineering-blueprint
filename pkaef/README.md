@@ -158,30 +158,55 @@ The gaps were *between* the stages, not inside them: every handoff meant queue t
 
 The **Knowledge-Driven AI Engineering Platform (v2)** is operating now. The disconnected, per-team AI of the past is replaced by a **single AI Workspace** that orchestrates the complete engineering process — grounded in the Knowledge Base as its single source of truth, and gated by explicit human decisions:
 
-```mermaid
-flowchart TB
+Every step is a decision point: the human decides **Yes** to accept the step's output and move forward, or **No** to reject it and send the work back to the very first step — the **Business Requirement** — so the loop restarts from a clean, re-grounded starting point.
 
-REQ[Business Requirement]
-KB[(Knowledge Base<br/>12 layers)]
+```mermaid
+flowchart LR
+
+REQ(["📥 Business Requirement<br/>the single starting point — a customer or internal need"])
 
 subgraph WS["🧠 AI WORKSPACE — one orchestrator for the complete lifecycle"]
-    IA[Impact Analysis] --> HA{Human Approval}
-    HA --> SPEC[Specification Generation]
-    SPEC --> TASK[Developer Task Preparation]
-    TASK --> EXP{"Explicit AI<br/>Implementation Request"}
-    EXP --> IMPL[AI Implementation]
-    IMPL --> VER["Verification<br/>build + prescribed tests"]
-    VER --> HCR[Human Code Review]
-    HCR --> PR[Pull Request Creation]
-    PR --> AIPR["Automatic AI PR Review<br/>coding standards · architecture compliance · implementation quality"]
-    AIPR --> MA{"Merge Approval<br/>final human review"}
-    MA --> DEL[Delivery]
-    DEL --> KF[Knowledge Feedback]
-    KF --> KBU[Knowledge Base Update]
+    direction LR
+
+    subgraph R1["Stage 1 — analyse &amp; develop"]
+        direction TB
+        IA["Impact Analysis<br/>map affected modules, data, APIs, rules & risks"] --> D1{Approved?}
+        D1 -->|Yes| TASK["Developer Task Preparation<br/>turn the analysis into one scoped task"]
+        D1 -->|No| RS1(["↩ back to<br/>Business Requirement"])
+        TASK --> D2{Approved?}
+        D2 -->|Yes| IMPL["AI Development (Writing Code)<br/>AI writes the implementation from the task"]
+        D2 -->|No| RS2(["↩ back to<br/>Business Requirement"])
+        IMPL --> D3{Approved?}
+        D3 -->|Yes| VER["Verification<br/>build + prescribed tests confirm behaviour"]
+        D3 -->|No| RS3(["↩ back to<br/>Business Requirement"])
+        VER --> D4{Approved?}
+        D4 -->|Yes| HCR["Human Code Review<br/>an engineer judges correctness & fit"]
+        D4 -->|No| RS4(["↩ back to<br/>Business Requirement"])
+        HCR --> D5{Approved?}
+        D5 -->|No| RS5(["↩ back to<br/>Business Requirement"])
+    end
+
+    subgraph R2["Stage 2 — review, deliver &amp; learn"]
+        direction TB
+        PR["Pull Request Creation<br/>open the reviewed change as a PR"] --> D6{Approved?}
+        D6 -->|Yes| AIPR["Automatic AI PR Review<br/>standards · architecture · quality"]
+        D6 -->|No| RS6(["↩ back to<br/>Business Requirement"])
+        AIPR --> D7{Approved?}
+        D7 -->|Yes| DEL["Delivery<br/>deploy the merged change"]
+        D7 -->|No| RS7(["↩ back to<br/>Business Requirement"])
+        DEL --> D8{Approved?}
+        D8 -->|Yes| KF["Knowledge Feedback<br/>capture what changed & was learned"]
+        D8 -->|No| RS8(["↩ back to<br/>Business Requirement"])
+        KF --> D9{Approved?}
+        D9 -->|Yes| KBU["Knowledge Base Update<br/>merge the learnings back"]
+        D9 -->|No| RS9(["↩ back to<br/>Business Requirement"])
+    end
+
+    D5 -->|Yes| PR
 end
 
 REQ --> IA
-KB <-->|single source of truth| WS
+KB[(Knowledge Base<br/>12 layers)] <-->|single source of truth| WS
 KBU -->|approval-gated merge| KB
 
 classDef ai fill:#7C3AED,stroke:#5B21B6,color:#FFFFFF
@@ -189,11 +214,13 @@ classDef human fill:#F59E0B,stroke:#B45309,color:#1F2937
 classDef kb fill:#0D9488,stroke:#0F766E,color:#FFFFFF
 classDef live fill:#16A34A,stroke:#15803D,color:#FFFFFF
 classDef input fill:#64748B,stroke:#475569,color:#FFFFFF
-class IA,SPEC,TASK,IMPL,VER,PR,AIPR ai
-class HA,EXP,HCR,MA human
+classDef restart fill:#FEE2E2,stroke:#DC2626,color:#7F1D1D
+class IA,TASK,IMPL,VER,PR,AIPR ai
+class D1,D2,D3,D4,D5,D6,D7,D8,D9,HCR human
 class DEL live
 class KF,KBU,KB kb
 class REQ input
+class RS1,RS2,RS3,RS4,RS5,RS6,RS7,RS8,RS9 restart
 style WS fill:#7C3AED14,stroke:#7C3AED
 ```
 
