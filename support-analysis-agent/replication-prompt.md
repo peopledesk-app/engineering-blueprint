@@ -59,7 +59,10 @@ the `setup` command in my own terminal. Do NOT ask me for them in this chat.
      "Open a separate terminal (not this chat) and run:
         peopledesk-support-analyze --profile <id> setup
       Enter: SQL Server host, port, database (VPT), YOUR SQL login and password
-      (hidden), YOUR team's Google Chat webhook (optional), and the workspace root.
+      (hidden), YOUR team's Google Chat webhook (optional), the workspace root,
+      optionally the dev database as <appsettings file>#<ConnectionStrings key>
+      (read at run time, never copied) and optionally YOUR team's PRODUCTION
+      read-only connection string (hidden; used only by /support:<id>-prod-debug).
       Reply 'done' here when finished — do not paste any of the values."
    After I reply, run `peopledesk-support-analyze --profile <id> doctor` (read-only).
    It must show credentialSource "profiles.<id>" — if it shows anything else, or
@@ -98,8 +101,10 @@ the `setup` command in my own terminal. Do NOT ask me for them in this chat.
    rule and propose a one-line written exception limited to support-agent fix PRs
    (regression test still required, never auto-merged). Apply it only after I approve.
 
-8. Install the command. Re-run install.sh so /support:<id> is generated; tell me to
-   restart Claude Code.
+8. Install the commands. Re-run install.sh so /support:<id> (dev data only) and
+   /support:<id>-prod-debug (may read production, read-only) are generated; tell me to
+   restart Claude Code. Verify with `peopledesk-support-analyze --profile <id> query
+   --db dev --sql "SELECT DB_NAME() AS db"` (read-only).
 
 9. First run — dry run. Run `/support:<id> --limit 1 --dry-run`. Open the preview
    HTML and the chat JSON and check them against the golden reference quality bar:

@@ -44,6 +44,8 @@
 | সাপোর্ট ডেটাবেস (`VPT`) লগইন | টিম লিড / DBA — **টিমের নিজস্ব লগইন** (সম্ভব হলে `sql/04-least-privilege-grant.sql` অনুযায়ী শুধু তিন কলামে লেখার অনুমতি) | প্রতিটি মেশিনে `~/.config/peopledesk-support-analyst/config.json`-এর `profiles.<id>` (chmod 600) — `setup` কমান্ড লেখে |
 | Google Chat webhook | টিমের **নিজের** Chat space থেকে (Apps & integrations → Webhooks) | একই জায়গায়, `profiles.<id>.googleChatWebhookUrl` — `setup` কমান্ড লেখে |
 | GitHub | প্রতিটি ডেভেলপারের নিজের `gh auth login` | GitHub CLI-র নিজস্ব স্টোর |
+| Production শুধু-পড়ার DB (ঐচ্ছিক) | টিম লিড / DBA — **টিমের নিজস্ব** read-only লগইন | `profiles.<id>.debugDatabases.production` — `setup` লেখে (লুকানো ইনপুট) |
+| Dev DB (ঐচ্ছিক) | কিছু দিতে হয় না — `setup`-এ শুধু `<appsettings ফাইল>#<key>` (যেমন `app-api/Api/appsettings.json#Development`) | রান-টাইমে রিপোজিটরি থেকে পড়া হয় |
 
 **কীভাবে দেবেন:** নিজের terminal-এ (chat-এ নয়) চালান —
 

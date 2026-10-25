@@ -237,6 +237,22 @@ begin ──► next ──► (টিকিট নেই?) ──হ্যা�
 2. **তারপর সোর্স** — ব্যাকএন্ড → ফ্রন্টএন্ড → রিপোর্ট → শিডিউলার → রিয়েল-টাইম, তারপর SQA।
 3. টিকিটের নিজের শব্দ **এবং** সেগুলো থেকে বোঝা যায় এমন ডোমেইন শব্দ দিয়ে খোঁজা (যেমন "salary দেখাচ্ছে না" → payroll, salary sheet, `sprSalary*`)।
 
+### ৮.৪ ডেটা যাচাই — dev ও production ডেটাবেস (শুধু পড়া)
+
+টিকিট বুঝতে ডেটা দেখা দরকার হলে এজেন্ট `query` কমান্ডে প্রোডাক্টের ডেটাবেসে **শুধু-পড়া** query চালায়:
+
+| ডেটাবেস | কোথা থেকে | কখন |
+|---|---|---|
+| `dev` | `app-api/Api/appsettings.json`-এর `ConnectionStrings.Development` — রান-টাইমে পড়া হয়, কোথাও কপি হয় না | প্রতিটি সাধারণ রান (`/support:peopledesk`) |
+| `production` | শুধু-পড়ার লগইন, লোকাল কনফিগে (`profiles.peopledesk.debugDatabases.production`, chmod 600) | **শুধু** `/support:peopledesk-prod-debug` রানে (`begin --debug-db production`); সাধারণ রানে `PRODUCTION_NOT_ALLOWED` |
+
+সুরক্ষা (কোডে প্রয়োগ): একটিমাত্র `SELECT` / `WITH … SELECT`; `INSERT/UPDATE/DELETE/MERGE/EXEC/INTO/DDL/SET/USE`… নিষিদ্ধ; প্রতিটি query এমন ট্রানজ্যাকশনে যা সবসময় rollback হয়; সর্বোচ্চ ২০০ (≤১০০০) রো, lock timeout ৫ সেকেন্ড, query timeout ৩০ সেকেন্ড; প্রতিটি query অডিট লগে (ডেটাবেস, রো সংখ্যা — ডেটা নয়)। ব্যক্তিগত তথ্য (নাম, বেতন, NID, ফোন, ব্যাংক) রিপোর্ট/PR/Chat-এ কপি হয় না — শুধু টেবিল/কলাম/আইডি ও সংখ্যা।
+
+```text
+/support:peopledesk TKT-…              # dev ডেটাবেস দিয়ে তদন্ত
+/support:peopledesk-prod-debug TKT-…   # বিশেষ ক্ষেত্রে production ডেটা দেখে তদন্ত
+```
+
 ### ৮.৩ নিশ্চিত বাগ → ফিক্স পুল রিকোয়েস্ট (মালিকের সিদ্ধান্ত, 2026-10-25)
 
 শুধু তখনই, যখন প্রমাণ দিয়ে বাগ **নিশ্চিত** (`rootCauseStatus: CONFIRMED` + `technicalChangeType: BUG_FIX`) — অনুমান (`LIKELY`) হলে কোনো PR নয়।
