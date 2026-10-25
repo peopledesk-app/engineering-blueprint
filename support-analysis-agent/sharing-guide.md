@@ -11,7 +11,7 @@
 
 | অংশ | কোথায় | প্রতিটি টিমকে বদলাতে হবে? |
 |---|---|---|
-| CLI (ডেটাবেস পড়া, যাচাই, রেন্ডার, সংরক্ষণ, Google Chat) | `peopledesk-business-ai/scripts/support-analyst/` | না |
+| CLI (ডেটাবেস পড়া, যাচাই, রেন্ডার, সংরক্ষণ, Google Chat) | `peopledesk-kb/scripts/support-analyst/` | না |
 | প্রোডাক্ট প্রোফাইল | `profiles/<id>.json` | **হ্যাঁ — শুধু এটিই** |
 | Golden reference (প্রতিটি রিপোজিটরিতে কী দেখতে হবে) | `golden-reference.md` | না (প্রয়োজনে নিজস্ব রিপোজিটরির নোট যোগ) |
 | Slash command (`/support:<id>`) | `commands/support-command.md.tmpl` থেকে স্বয়ংক্রিয় তৈরি | না |

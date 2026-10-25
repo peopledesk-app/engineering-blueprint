@@ -17,7 +17,7 @@ implementation. Do not build a new one and do not fork it.
 == Our values — NOT secrets (ask me for anything left as <…>; never guess) ==
 Product name ............ <e.g. Managerium ERP>
 Profile id .............. <lowercase, e.g. managerium>  -> becomes /support:<id>
-Kit ..................... <path or git URL of peopledesk-business-ai>; the kit is scripts/support-analyst/
+Kit ..................... <path or git URL of peopledesk-kb>; the kit is scripts/support-analyst/
 Workspace root .......... <absolute path of THIS workspace>
 Project Tracker ticket URL with {ticketId} ... <e.g. https://pt.ibos.io/support/tickets/view/{ticketId}>
 Code repositories where confirmed-bug fix PRs may be opened:
@@ -41,7 +41,7 @@ the `setup` command in my own terminal. Do NOT ask me for them in this chat.
 == Read first, in full ==
 1. <kit>/scripts/support-analyst/README.md
 2. <kit>/scripts/support-analyst/golden-reference.md
-3. engineering-blueprint/support-analysis-agent/sharing-guide.md (if available)
+3. peopledesk-blueprint/support-analysis-agent/sharing-guide.md (if available)
 
 == Steps — report each result and wait where it says STOP ==
 

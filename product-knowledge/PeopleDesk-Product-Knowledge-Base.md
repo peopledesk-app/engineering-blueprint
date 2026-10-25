@@ -57,8 +57,8 @@ Every meaningful statement carries exactly one evidence status, shown in a `Stat
 
 Evidence sources are ranked as follows (highest first). Where an official document and the source code disagree, both positions are stated and the disagreement is recorded as **Partially Verified** and, where material, as a leadership review point.
 
-1. Released official documents in the Blueprint Repository: `engineering-blueprint/docs/PeopleDesk-HRMS-Technical-Architecture-v2.1.md` (Status: Released, Owner: Engineering Leadership) and `engineering-blueprint/docs/PeopleDesk-Solution-Documentation.md` (Official Product Handbook, client-facing, Product Version 2.0).
-2. The PeopleDesk Knowledge Base: `peopledesk-business-ai/knowledge/` (162 files, 11 layers, master index `_index.md`), built from source and live-DB extraction.
+1. Released official documents in the Blueprint Repository: `peopledesk-blueprint/docs/PeopleDesk-HRMS-Technical-Architecture-v2.1.md` (Status: Released, Owner: Engineering Leadership) and `peopledesk-blueprint/docs/PeopleDesk-Solution-Documentation.md` (Official Product Handbook, client-facing, Product Version 2.0).
+2. The PeopleDesk Knowledge Base: `peopledesk-kb/knowledge/` (162 files, 11 layers, master index `_index.md`), built from source and live-DB extraction.
 3. Source code of the five product repositories: `app-api`, `app-front`, `app-report-api`, `app-scheduler-api`, `app-signalr-api`.
 4. Internal assessment reports: Enterprise HRM Assessment (`EAR-2026-08-03`), Service Decomposition Review (`SMA-2026-08-08`), VAPT Remediation Plan (`2026-08-16`), Knowledge Completeness Reports (`KCR-*`). These are evidence-based technical assessments, **not** leadership-approved product documents.
 
@@ -227,7 +227,7 @@ employee-profile 160 · compensation-benefits 92 · self-service 89 · pms 75 ·
 
 ### 7.3 Feature catalogue
 
-The complete feature-level catalogue (feature, business purpose, description, benefit, typical users) for every module is maintained in the official handbook, `engineering-blueprint/docs/PeopleDesk-Solution-Documentation.md` §4 (13 feature tables, ~110 features). It is the authoritative business-language feature list and is not duplicated here. **Status: Verified** as an official document; individual feature behaviour is confirmed at the rule level in §9.
+The complete feature-level catalogue (feature, business purpose, description, benefit, typical users) for every module is maintained in the official handbook, `peopledesk-blueprint/docs/PeopleDesk-Solution-Documentation.md` §4 (13 feature tables, ~110 features). It is the authoritative business-language feature list and is not duplicated here. **Status: Verified** as an official document; individual feature behaviour is confirmed at the rule level in §9.
 
 ---
 
@@ -783,14 +783,14 @@ Risk ids are stable for traceability. Severity follows the source assessments; e
 
 ### 21.2 Internal dependencies — Verified
 
-- Cross-module dependency graph with 105 evidenced edges: `peopledesk-business-ai/dependency-graph/dependency-graph.md`.
+- Cross-module dependency graph with 105 evidenced edges: `peopledesk-kb/dependency-graph/dependency-graph.md`.
 - Five circular dependencies identified: Payroll ⇄ Tax, Payroll ⇄ Retirement (PF), Employee ⇄ Payroll, Leave ⇄ Attendance, Recruitment ⇄ Employee (SMA `06-dependency-matrix.md`).
 - Every module depends on Employee (system of record) and on Identity/Tenancy (`ICurrentUser`, injected in ~67–72 files).
 - Reporting and scheduler services read the core's tables directly (shared database, no contracts).
 
 ### 21.3 Engineering-knowledge dependencies — Verified
 
-The product's own documentation and analysis tooling live in `peopledesk-business-ai` (Knowledge Base 162 files, dependency graph, Graphify code graph 11,802 nodes / 22,862 edges, Ponytail context layer, NHV register ~87 items) and `engineering-blueprint` (PKAEF framework, released architecture and handbook documents). These are the most complete descriptions of the product and are the primary secondary source of this document.
+The product's own documentation and analysis tooling live in `peopledesk-kb` (Knowledge Base 162 files, dependency graph, Graphify code graph 11,802 nodes / 22,862 edges, Ponytail context layer, NHV register ~87 items) and `peopledesk-blueprint` (PKAEF framework, released architecture and handbook documents). These are the most complete descriptions of the product and are the primary secondary source of this document.
 
 ---
 
@@ -844,14 +844,14 @@ No product roadmap, vision statement, success metrics or competitive analysis ex
 
 | Source | Path | Kind |
 |---|---|---|
-| Technical Architecture Overview v2.1 (Released, Engineering Leadership) | `engineering-blueprint/docs/PeopleDesk-HRMS-Technical-Architecture-v2.1.md` | Official document |
-| Product Documentation / Handbook v1.0 (Product Version 2.0) | `engineering-blueprint/docs/PeopleDesk-Solution-Documentation.md` | Official document |
-| Blueprint README, PKAEF, SDT WHAT list | `engineering-blueprint/README.md`, `pkaef/`, `sdt-what-list/` | Framework docs |
-| Knowledge Base master index and layers | `peopledesk-business-ai/knowledge/_index.md`, `00-enterprise/`, `01-processes/`, `02-business-rules/`, `03-modules/`, `04-data/`, `05-api/`, `06-ui/`, `07-security/`, `08-audit-compliance/`, `09-architecture/`, `10-test-cases/`, `glossary/` | Reverse-engineered KB |
-| Enterprise HRM Assessment | `peopledesk-business-ai/reports/EAR-2026-08-03-enterprise-hrm-assessment.md` | Internal assessment |
-| Service Decomposition & Modernization Assessment | `peopledesk-business-ai/reports/SMA-2026-08-08-peopledesk-service-decomposition/` | Internal assessment (draft) |
-| VAPT Remediation Plan | `peopledesk-business-ai/reports/VAPT-Remediation-Plan-2026-08-16.md` | Internal security analysis |
-| Knowledge Completeness Reports | `peopledesk-business-ai/reports/KCR-2026-07-08.md`, `KCR-2026-07-09.md`, `KCR-2026-07-16.md` | Coverage records |
+| Technical Architecture Overview v2.1 (Released, Engineering Leadership) | `peopledesk-blueprint/docs/PeopleDesk-HRMS-Technical-Architecture-v2.1.md` | Official document |
+| Product Documentation / Handbook v1.0 (Product Version 2.0) | `peopledesk-blueprint/docs/PeopleDesk-Solution-Documentation.md` | Official document |
+| Blueprint README, PKAEF, SDT WHAT list | `peopledesk-blueprint/README.md`, `pkaef/`, `sdt-what-list/` | Framework docs |
+| Knowledge Base master index and layers | `peopledesk-kb/knowledge/_index.md`, `00-enterprise/`, `01-processes/`, `02-business-rules/`, `03-modules/`, `04-data/`, `05-api/`, `06-ui/`, `07-security/`, `08-audit-compliance/`, `09-architecture/`, `10-test-cases/`, `glossary/` | Reverse-engineered KB |
+| Enterprise HRM Assessment | `peopledesk-kb/reports/EAR-2026-08-03-enterprise-hrm-assessment.md` | Internal assessment |
+| Service Decomposition & Modernization Assessment | `peopledesk-kb/reports/SMA-2026-08-08-peopledesk-service-decomposition/` | Internal assessment (draft) |
+| VAPT Remediation Plan | `peopledesk-kb/reports/VAPT-Remediation-Plan-2026-08-16.md` | Internal security analysis |
+| Knowledge Completeness Reports | `peopledesk-kb/reports/KCR-2026-07-08.md`, `KCR-2026-07-09.md`, `KCR-2026-07-16.md` | Coverage records |
 | Backend source | `app-api/` (`PeopleDesk.sln`, `Api/Program.cs`, controllers, endpoints, middleware, `InfraServices/`, `Services/`, `Tests/`, `Api/Migrations/`, Dockerfile, pipeline and K8s YAML, `appsettings.json` key names) | Source code |
 | Frontend source | `app-front/` (`package.json`, `index.html`, `public/manifest.json`, `nginx/nginx.conf`, `src/`) | Source code |
 | Reporting source | `app-report-api/` (`Server.sln`, `Api/Program.cs`, csproj, `.gitlab-ci.yml`) | Source code |

@@ -2,8 +2,8 @@
 
 > **স্ট্যাটাস:** বাস্তবায়ন চলছে (v1) · **শেষ হালনাগাদ:** 2026-10-22
 > **কমান্ড:** `/support:peopledesk` (প্রতিটি প্রোডাক্টের জন্য `/support:<id>`) · **CLI:** `peopledesk-support-analyze`
-> **অন্য টিমে শেয়ার:** [sharing-guide.md](sharing-guide.md) · [replication-prompt.md](replication-prompt.md) · **Golden reference:** `peopledesk-business-ai/scripts/support-analyst/golden-reference.md`
-> **কোডের অবস্থান:** `peopledesk-business-ai/scripts/support-analyst/`
+> **অন্য টিমে শেয়ার:** [sharing-guide.md](sharing-guide.md) · [replication-prompt.md](replication-prompt.md) · **Golden reference:** `peopledesk-kb/scripts/support-analyst/golden-reference.md`
+> **কোডের অবস্থান:** `peopledesk-kb/scripts/support-analyst/`
 > **ডেটাবেস:** Microsoft SQL Server — `[VPT].[dbo].[tblProduct]`, `[VPT].[dbo].[tblSupportTicket]`
 
 এই ডকুমেন্টটি এই কনসেপ্টের একমাত্র এন্ট্রি পয়েন্ট। এজেন্টটি কী করে, কীভাবে কাজ করে, কোন নিয়ম মেনে চলে, কীভাবে ইনস্টল ও চালাতে হয় — সবকিছু এখানে আছে।
@@ -41,7 +41,7 @@
 একটি লোকাল এজেন্ট, যা:
 
 1. SQL Server ভিউ থেকে PeopleDesk-এর **অপেক্ষমাণ (pending)** সাপোর্ট টিকিট পড়ে — **সবচেয়ে পুরনোটা আগে, একবারে একটি**।
-2. প্রতিটি টিকিট এই ওয়ার্কস্পেসের PeopleDesk সোর্স কোড (`app-api`, `app-front`, `app-report-api`, `app-scheduler-api`, `app-signalr-api`) এবং Knowledge Base (`peopledesk-business-ai/knowledge/`) মিলিয়ে একজন ডেভেলপারের মতো বিশ্লেষণ করে।
+2. প্রতিটি টিকিট এই ওয়ার্কস্পেসের PeopleDesk সোর্স কোড (`app-api`, `app-front`, `app-report-api`, `app-scheduler-api`, `app-signalr-api`) এবং Knowledge Base (`peopledesk-kb/knowledge/`) মিলিয়ে একজন ডেভেলপারের মতো বিশ্লেষণ করে।
 3. প্রমাণ-ভিত্তিক, সংক্ষিপ্ত একটি রিপোর্ট তৈরি করে — **বাংলা আগে, ইংরেজি পরে**।
 4. একই যাচাইকৃত বিশ্লেষণ থেকে দুটি ফরম্যাট বানায় এবং মূল টিকিট-রো-তে সংরক্ষণ করে:
    - **HTML** → `strAIFeadbackWithHTML` (PeopleX বা অন্য ওয়েব UI-তে দেখানোর জন্য)
@@ -147,7 +147,7 @@ peopledesk-support-analyze (Node.js CLI)
 ## ৬. SQL Server ভিউ
 
 **প্রস্তাবিত নাম:** `[VPT].[dbo].[vwPeopleDeskPendingSupportTicketAIAnalysis]` (D6 যাচাইয়ের পর চূড়ান্ত)।
-**স্ক্রিপ্ট:** `peopledesk-business-ai/scripts/support-analyst/sql/02-create-view.sql` — এতে `<<VERIFIED_PRODUCT_CODE>>` প্লেসহোল্ডার আছে; D1 যাচাইয়ের আগে এটি চালানো যাবে না। **এজেন্ট কখনো DDL নিজে চালায় না** — DBA/রিভিউয়ার রিভিউ করে চালাবেন।
+**স্ক্রিপ্ট:** `peopledesk-kb/scripts/support-analyst/sql/02-create-view.sql` — এতে `<<VERIFIED_PRODUCT_CODE>>` প্লেসহোল্ডার আছে; D1 যাচাইয়ের আগে এটি চালানো যাবে না। **এজেন্ট কখনো DDL নিজে চালায় না** — DBA/রিভিউয়ার রিভিউ করে চালাবেন।
 
 ভিউ যা করে:
 
@@ -212,7 +212,7 @@ begin ──► next ──► (টিকিট নেই?) ──হ্যা�
 
 | রিপোজিটরি | কী দেখতে হবে |
 |---|---|
-| `peopledesk-business-ai` | Knowledge Base — মডিউল, ব্যবসায়িক নিয়ম, decision table, ডেটা ডিকশনারি, API/রিপোর্ট/শিডিউলার ইনভেন্টরি, স্ক্রিন, পারমিশন, খোলা `NHV` |
+| `peopledesk-kb` | Knowledge Base — মডিউল, ব্যবসায়িক নিয়ম, decision table, ডেটা ডিকশনারি, API/রিপোর্ট/শিডিউলার ইনভেন্টরি, স্ক্রিন, পারমিশন, খোলা `NHV` |
 | `app-api` | Controller/endpoint → MediatR handler/service → validator → domain নিয়ম → পারমিশন → EF কুয়েরি বা SP |
 | `app-front` | `strMenuName`-এর route ও পেজ → ফর্ম ও ক্লায়েন্ট ভ্যালিডেশন → API কল → ফলাফল প্রদর্শন |
 | `app-report-api` | মডিউলের রিপোর্ট endpoint → রিপোর্ট কুয়েরি/SP → RDLC |
@@ -220,7 +220,7 @@ begin ──► next ──► (টিকিট নেই?) ──হ্যা�
 | `app-signalr-api` | মডিউলের নোটিফিকেশন/মেসেজিং hub ও controller |
 | `peopledesk-sqa` | টেস্ট কেস, টেস্ট প্ল্যান, পরিচিত ডিফেক্ট — বা টেস্ট-কভারেজ ঘাটতি |
 
-বিস্তারিত চেকলিস্ট, মানদণ্ড ও শ্রেণিবিন্যাস গাইড: **golden reference** (`peopledesk-business-ai/scripts/support-analyst/golden-reference.md`) — প্রতিটি রানের শুরুতে পড়া বাধ্যতামূলক। পূর্ণ নমুনা: `examples/analysis.example.json`।
+বিস্তারিত চেকলিস্ট, মানদণ্ড ও শ্রেণিবিন্যাস গাইড: **golden reference** (`peopledesk-kb/scripts/support-analyst/golden-reference.md`) — প্রতিটি রানের শুরুতে পড়া বাধ্যতামূলক। পূর্ণ নমুনা: `examples/analysis.example.json`।
 
 **কোডে প্রয়োগ** (নির্দেশনা নয়, `save` নিজে প্রত্যাখ্যান করে — `INVALID_ANALYSIS`):
 
@@ -280,7 +280,7 @@ begin ──► next ──► (টিকিট নেই?) ──হ্যা�
 
 `save` যাচাই করে: নিশ্চিত বাগে PR অথবা `fixNotOpenedReason` (যেমন ফিক্সটি stored procedure-এ) থাকতেই হবে; আর নিশ্চিত নয় এমন বিশ্লেষণে PR থাকলে প্রত্যাখ্যান।
 
-**নীতিগত ব্যতিক্রম:** `--no-verify` সাধারণভাবে নিষিদ্ধ (testing policy)। শুধু এই এজেন্টের `fix-open`-এর জন্য মালিকের লিখিত ব্যতিক্রম যোগ করা হয়েছে — `peopledesk-business-ai/instructions/testing-policy.md` ("On `--no-verify`"), `peopledesk-business-ai/CLAUDE.md` ও workspace `CLAUDE.md`-তে। regression টেস্ট তবুও বাধ্যতামূলক।
+**নীতিগত ব্যতিক্রম:** `--no-verify` সাধারণভাবে নিষিদ্ধ (testing policy)। শুধু এই এজেন্টের `fix-open`-এর জন্য মালিকের লিখিত ব্যতিক্রম যোগ করা হয়েছে — `peopledesk-kb/instructions/testing-policy.md` ("On `--no-verify`"), `peopledesk-kb/CLAUDE.md` ও workspace `CLAUDE.md`-তে। regression টেস্ট তবুও বাধ্যতামূলক।
 
 ### প্রমাণের নিয়ম
 
@@ -330,7 +330,7 @@ begin ──► next ──► (টিকিট নেই?) ──হ্যা�
 
 ### ৯.৩ Analysis JSON (AI যা লেখে)
 
-সম্পূর্ণ স্কিমা ও golden উদাহরণ (`schemaVersion: 2`): `peopledesk-business-ai/scripts/support-analyst/examples/analysis.example.json`। সংক্ষেপে — প্রতিটি টেক্সট ফিল্ড `{ "bn": "...", "en": "..." }`; দুই ভাষার যেকোনো একটি খালি থাকলে, অথবা `repositoryCoverage`/প্রমাণ §৮.১-এর নিয়ম ভাঙলে `save` প্রত্যাখ্যান করে (`INVALID_ANALYSIS`)।
+সম্পূর্ণ স্কিমা ও golden উদাহরণ (`schemaVersion: 2`): `peopledesk-kb/scripts/support-analyst/examples/analysis.example.json`। সংক্ষেপে — প্রতিটি টেক্সট ফিল্ড `{ "bn": "...", "en": "..." }`; দুই ভাষার যেকোনো একটি খালি থাকলে, অথবা `repositoryCoverage`/প্রমাণ §৮.১-এর নিয়ম ভাঙলে `save` প্রত্যাখ্যান করে (`INVALID_ANALYSIS`)।
 
 ---
 
@@ -499,7 +499,7 @@ UPDATE t
 ### ইনস্টল (প্রতি মেশিনে একবার)
 
 ```bash
-cd peopledesk-business-ai/scripts/support-analyst
+cd peopledesk-kb/scripts/support-analyst
 bash install.sh
 ```
 
@@ -553,7 +553,7 @@ peopledesk-support-analyze --help                   # সব কমান্ড�
 
 এটি এজেন্টের নিয়মিত কাজ নয় — এককালীন, বড় পরিসরের ডেটা আপডেট। তাই:
 
-- স্ক্রিপ্ট: `peopledesk-business-ai/scripts/support-analyst/sql/03-backfill-mark-read-before-2026-10-18.sql`।
+- স্ক্রিপ্ট: `peopledesk-kb/scripts/support-analyst/sql/03-backfill-mark-read-before-2026-10-18.sql`।
 - **প্রথমে প্রিভিউ** — কতগুলো রো প্রভাবিত হবে (প্রোডাক্ট অনুযায়ী) এবং কোন তারিখ কলাম (`InsertDate` না `dteIssueDate`) ধরা হবে, তা নিশ্চিত করা।
 - **ব্যাকআপ** — আপডেটের আগে প্রভাবিত `intSupportTicketId` ও পুরনো `IsReadFromPlatform` মান একটি ব্যাকআপ টেবিলে (`tblSupportTicket_IsReadBackfill_20261022`) রাখা, যাতে rollback সম্ভব।
 - শর্ত: `[InsertDate] < '2026-10-18'` এবং `ISNULL(IsReadFromPlatform,0) = 0` — অর্থাৎ ১৮ তারিখ ও তার পরের টিকিট অপেক্ষমাণই থাকবে।
@@ -587,7 +587,7 @@ peopledesk-support-analyze --help                   # সব কমান্ড�
 
 AI কলের জন্য fixture JSON; ইন্টিগ্রেশন টেস্ট শুধু আলাদা টেস্ট ডেটাবেসে — **প্রোডাকশনে কখনো নয়**। শুধু আসলে চালানো টেস্টের ফলাফল রিপোর্ট করা হবে।
 
-চালানো: `cd peopledesk-business-ai/scripts/support-analyst && npm test` (Node built-in `node:test`)।
+চালানো: `cd peopledesk-kb/scripts/support-analyst && npm test` (Node built-in `node:test`)।
 
 ---
 
@@ -607,7 +607,7 @@ AI কলের জন্য fixture JSON; ইন্টিগ্রেশন ট
 
 ## ২০. Definition of Done
 
-- [ ] বাস্তবায়ন এই ওয়ার্কস্পেসের রিপোজিটরিতে (`peopledesk-business-ai/scripts/support-analyst/`)।
+- [ ] বাস্তবায়ন এই ওয়ার্কস্পেসের রিপোজিটরিতে (`peopledesk-kb/scripts/support-analyst/`)।
 - [ ] PeopleDesk-এর আসল প্রোডাক্ট কোড ও আইডি `tblProduct` থেকে যাচাইকৃত।
 - [ ] ভিউ শুধু নির্ধারিত PeopleDesk অপেক্ষমাণ টিকিট দেয়।
 - [ ] ক্রম স্পষ্ট, নির্ধারিত, পুরনোটা আগে।
@@ -637,4 +637,4 @@ Managerium বা অন্য যেকোনো প্রোডাক্ট �
 
 - **গাইড (বাংলা):** [sharing-guide.md](sharing-guide.md) — কী শেয়ার হচ্ছে, যাচাইকৃত প্রোডাক্ট তালিকা, ধাপে ধাপে চালু করা, মান যাচাই চেকলিস্ট, মালিকানা।
 - **Claude Code প্রম্পট (ইংরেজি):** [replication-prompt.md](replication-prompt.md) — টিমের ওয়ার্কস্পেসে পেস্ট করলে Claude যাচাইসহ সেটআপ করে এবং অনুমোদনের জায়গায় থামে।
-- **শেয়ার করার জিনিস:** `peopledesk-business-ai/scripts/support-analyst/` ফোল্ডার (বা এই রিপো) + এই তিনটি ডকুমেন্ট। **কখনো শেয়ার নয়:** লোকাল কনফিগ, DB পাসওয়ার্ড, webhook URL।
+- **শেয়ার করার জিনিস:** `peopledesk-kb/scripts/support-analyst/` ফোল্ডার (বা এই রিপো) + এই তিনটি ডকুমেন্ট। **কখনো শেয়ার নয়:** লোকাল কনফিগ, DB পাসওয়ার্ড, webhook URL।

@@ -23,7 +23,7 @@ The product is one system built from five repositories:
 | `app-front` | Frontend | React + TypeScript, Vite, Redux |
 | `app-report-api` | Reporting | .NET reporting service |
 | `app-scheduler-api` | Background jobs | .NET scheduler service |
-| `peopledesk-business-ai` | **AI Workspace (PKAEF home)** | Markdown-only AI workspace: Knowledge Base, modes, skills, templates |
+| `peopledesk-kb` | **AI Workspace (PKAEF home)** | Markdown-only AI workspace: Knowledge Base, modes, skills, templates |
 
 ```mermaid
 flowchart TB
@@ -37,7 +37,7 @@ subgraph Product["PeopleDesk Product"]
 end
 
 subgraph AI["PKAEF — Knowledge-Driven AI Engineering Framework"]
-    BAI[peopledesk-business-ai]
+    BAI[peopledesk-kb]
     KB[(Knowledge Base<br/>12 layers)]
 end
 
