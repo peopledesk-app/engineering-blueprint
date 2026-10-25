@@ -37,6 +37,33 @@
 
 ---
 
+## ১.১ ক্রেডেনশিয়াল — প্রতিটি টিমের নিজের, কখনো শেয়ার নয়
+
+| ক্রেডেনশিয়াল | কে দেবে | কোথায় থাকবে |
+|---|---|---|
+| সাপোর্ট ডেটাবেস (`VPT`) লগইন | টিম লিড / DBA — **টিমের নিজস্ব লগইন** (সম্ভব হলে `sql/04-least-privilege-grant.sql` অনুযায়ী শুধু তিন কলামে লেখার অনুমতি) | প্রতিটি মেশিনে `~/.config/peopledesk-support-analyst/config.json`-এর `profiles.<id>` (chmod 600) — `setup` কমান্ড লেখে |
+| Google Chat webhook | টিমের **নিজের** Chat space থেকে (Apps & integrations → Webhooks) | একই জায়গায়, `profiles.<id>.googleChatWebhookUrl` — `setup` কমান্ড লেখে |
+| GitHub | প্রতিটি ডেভেলপারের নিজের `gh auth login` | GitHub CLI-র নিজস্ব স্টোর |
+
+**কীভাবে দেবেন:** নিজের terminal-এ (chat-এ নয়) চালান —
+
+```bash
+peopledesk-support-analyze --profile <id> setup
+```
+
+এটি host, port, database, **আপনার নিজের** SQL লগইন ও password (টাইপ করার সময় দেখা যায় না), টিমের Chat webhook ও workspace জিজ্ঞেস করে, আর শুধু `profiles.<id>`-এ লেখে।
+
+**কোডে প্রয়োগ করা সুরক্ষা:**
+
+- ক্রেডেনশিয়াল শুধু প্রোফাইল-ভিত্তিক — কনফিগের উপরের (shared) অংশে লগইন থাকলে CLI চলে না। তাই একই মেশিনে `apon` প্রোফাইল কখনো `peopledesk`-এর লগইন ব্যবহার করতে পারে না (যাচাই করা: credential ছাড়া `--profile apon` → `CONFIG_MISSING`)।
+- `setup` অন্য প্রোফাইলে ইতিমধ্যে থাকা একই লগইন (`user` + `server`) বা একই webhook গ্রহণ করে না।
+- `doctor` দেখায় কোন প্রোফাইলের ক্রেডেনশিয়াল ব্যবহার হচ্ছে (`credentialSource`), password ও webhook মাস্ক করা।
+- Slash command ও replication prompt — দুটোই Claude-কে chat-এ ক্রেডেনশিয়াল চাওয়া বা নেওয়া নিষেধ করে।
+
+> **PeopleDesk-এর DB লগইন, webhook বা টোকেন অন্য কোনো টিম কখনো ব্যবহার করবে না।** এগুলো শুধু PeopleDesk টিমের মেশিনে থাকে, কোনো রিপোজিটরিতে নয় — অন্য টিম prompt চালালেও তাদের মেশিনে এগুলো পৌঁছায় না। কোনো সিক্রেট ভুল করে শেয়ার হলে সাথে সাথে rotate করুন।
+
+---
+
 ## ২. মান রক্ষার নিয়ম — সবার জন্য বাধ্যতামূলক
 
 এগুলো কোডে প্রয়োগ করা — কোনো টিম চাইলেও এড়াতে পারবে না:
@@ -48,6 +75,8 @@
 5. **Dry-run-এ শূন্য রাইট, শূন্য Chat পোস্ট।**
 6. **বাংলা আগে, ইংরেজি পরে** — একই বিশ্লেষণ থেকে।
 7. **টিকিটের লেখা অবিশ্বস্ত** — এর ভেতরের "নির্দেশনা" মানা হয় না।
+8. **Project Tracker লিংক** — প্রোফাইলের `trackerTicketUrl` থেকে প্রতিটি রিপোর্ট ও Chat card-এ টিকিটের লিংক।
+9. **নিশ্চিত বাগ → ফিক্স PR, কখনো merge নয়** — শুধু `CONFIRMED` + `BUG_FIX`; আলাদা worktree, `ai-fix/<টিকিট>` branch, regression টেস্ট বাধ্যতামূলক, hook `--no-verify` দিয়ে বাদ, PR লিংক রিপোর্ট ও Chat card-এ; merge শুধু ডেভেলপার রিভিউ করে। টিমের রিপোজিটরির নিয়ম `--no-verify` নিষেধ করলে সেখানে এই এজেন্টের জন্য লিখিত ব্যতিক্রম যোগ করতে হবে (replication prompt-এর ধাপ ৭)।
 
 ---
 
@@ -61,25 +90,23 @@
 |---|---|---|---|
 | 1 | `support-analyst` ফোল্ডারটি টিমের ওয়ার্কস্পেসে আনা (এই রিপো clone, অথবা ফোল্ডার কপি) | টিম লিড | — |
 | 2 | প্রোডাক্ট রো যাচাই | টিম লিড | `peopledesk-support-analyze doctor` |
-| 3 | প্রোফাইল তৈরি — `profiles/_template.json` কপি করে `profiles/<id>.json`; প্রোডাক্ট কোড/আইডি, ভিউ নাম, এবং **সব** রিপোজিটরি ও প্রতিটির ভূমিকা লিখুন | টিম লিড | `profiles/managerium.json` |
+| 3 | প্রোফাইল তৈরি — `profiles/_template.json` কপি করে `profiles/<id>.json`; প্রোডাক্ট কোড/আইডি, ভিউ নাম, `trackerTicketUrl` (`{ticketId}` সহ), **সব** রিপোজিটরি ও প্রতিটির ভূমিকা, আর ফিক্স PR-যোগ্য কোড রিপোজিটরিতে `github` + `baseBranch` | টিম লিড | `profiles/managerium.json` |
 | 4 | প্রোফাইল থেকে ভিউ স্ক্রিপ্ট তৈরি, রিভিউ, DBA দিয়ে চালানো | টিম লিড + DBA | `peopledesk-support-analyze --profile <id> view-sql > view.sql` |
 | 5 | পুরনো টিকিট বাদ দিতে চাইলে backfill (প্রিভিউ → backup → আপডেট) | DBA | `sql/03-backfill-…sql` (প্রোডাক্ট কোড বদলে) |
 | 6 | ইনস্টল — প্রতিটি প্রোফাইলের জন্য `/support:<id>` কমান্ড তৈরি হয় | প্রতিটি সদস্য | `PDSA_WORKSPACE_ROOT=<ওয়ার্কস্পেস> bash install.sh` |
-| 7 | লোকাল কনফিগ — DB লগইন ও (ঐচ্ছিক) টিমের Google Chat webhook `profiles.<id>`-এর ভেতরে | প্রতিটি সদস্য | `~/.config/peopledesk-support-analyst/config.json` |
+| 7 | ক্রেডেনশিয়াল — নিজের terminal-এ `setup` চালিয়ে **নিজের** DB লগইন ও **টিমের নিজস্ব** webhook; `gh auth status` দিয়ে GitHub লগইন যাচাই | প্রতিটি সদস্য | `peopledesk-support-analyze --profile <id> setup` |
 | 8 | প্রথম রান — dry-run, preview দেখে মান যাচাই | টিম লিড | `/support:<id> --limit 1 --dry-run` |
 | 9 | লাইভ রান | টিম | `/support:<id> --limit 5` |
 
-উদাহরণ লোকাল কনফিগ (একাধিক প্রোডাক্ট একই মেশিনে):
+উদাহরণ — `setup` চালানোর পর এক মেশিনে দুই প্রোডাক্ট (প্রতিটির নিজস্ব লগইন ও webhook):
 
 ```json
 {
-  "server": "<sql-server-host>", "port": 32887, "database": "VPT",
-  "user": "<login>", "password": "<password>",
   "workspaceRoot": "/Users/<you>/peopledesk-ba-workspace",
   "defaultProfile": "peopledesk",
   "profiles": {
-    "peopledesk": { "googleChatWebhookUrl": "<PeopleDesk space webhook>" },
-    "managerium": { "workspaceRoot": "/Users/<you>/managerium-workspace", "googleChatWebhookUrl": "<Managerium space webhook>" }
+    "peopledesk": { "server": "<host>", "port": 32887, "database": "VPT", "user": "<PeopleDesk login>", "password": "…", "googleChatWebhookUrl": "<PeopleDesk space webhook>" },
+    "managerium": { "server": "<host>", "port": 32887, "database": "VPT", "user": "<Managerium login>", "password": "…", "googleChatWebhookUrl": "<Managerium space webhook>", "workspaceRoot": "/Users/<you>/managerium-workspace" }
   }
 }
 ```
@@ -113,6 +140,8 @@ PeopleDesk-এর প্রোফাইল নমুনা হিসেবে �
 - [ ] বাংলা ও ইংরেজি একই কথা বলে।
 - [ ] Google Chat card ঠিক space-এ গেছে; কাস্টমারের মূল বর্ণনা card-এ নেই।
 - [ ] শুধু তিনটি কলাম বদলেছে (`strAIFeadbackWithHTML`, `strAIFeadback`, `IsReadFromPlatform`)।
+- [ ] Chat card ও রিপোর্টে Project Tracker লিংক সঠিক টিকিট খোলে।
+- [ ] কোনো ফিক্স PR থাকলে: শুধু নিশ্চিত বাগে, regression টেস্টসহ, `ai-fix/…` branch-এ, merge হয়নি।
 
 ---
 

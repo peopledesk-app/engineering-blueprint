@@ -56,10 +56,11 @@
 
 | এজেন্ট করে | এজেন্ট কখনো করে না |
 |---|---|
-| টিকিট পড়ে, বিশ্লেষণ করে, সুপারিশ দেয় | PeopleDesk সোর্স কোড পরিবর্তন |
+| টিকিট পড়ে, বিশ্লেষণ করে, সুপারিশ দেয় | ডেভেলপারের নিজের checkout-এ বা base branch-এ সোর্স কোড পরিবর্তন |
+| **নিশ্চিত (`CONFIRMED`) বাগে** আলাদা worktree-তে ফিক্স + regression টেস্ট করে PR খোলে (§৮.৩) | PR merge করা — merge সবসময় ডেভেলপার রিভিউ করে করেন |
 | তিনটি অনুমোদিত কলামে লেখে | টিকিট স্ট্যাটাস, ইস্যু স্ট্যাটাস, অ্যাসাইনমেন্ট, কমেন্ট বদলানো |
 | প্রমাণ (ফাইল পাথ, সিম্বল, লাইন) উল্লেখ করে | কাস্টমার ডেটা সংশোধন, পারমিশন পরিবর্তন |
-| অনিশ্চয়তা স্পষ্টভাবে জানায় | deploy, commit, push, PR তৈরি |
+| অনিশ্চয়তা স্পষ্টভাবে জানায় | deploy; ফিক্স PR ছাড়া অন্য কোনো commit/push |
 | নিরাপদ read-only যাচাইয়ের প্রস্তাব দেয় | প্রোডাকশনে অনুমানভিত্তিক SQL বা ডেটা মিউটেশন |
 | | স্কিমা পরিবর্তন স্বয়ংক্রিয়ভাবে চালানো (DDL সবসময় রিভিউ করা স্ক্রিপ্ট) |
 
@@ -236,6 +237,20 @@ begin ──► next ──► (টিকিট নেই?) ──হ্যা�
 2. **তারপর সোর্স** — ব্যাকএন্ড → ফ্রন্টএন্ড → রিপোর্ট → শিডিউলার → রিয়েল-টাইম, তারপর SQA।
 3. টিকিটের নিজের শব্দ **এবং** সেগুলো থেকে বোঝা যায় এমন ডোমেইন শব্দ দিয়ে খোঁজা (যেমন "salary দেখাচ্ছে না" → payroll, salary sheet, `sprSalary*`)।
 
+### ৮.৩ নিশ্চিত বাগ → ফিক্স পুল রিকোয়েস্ট (মালিকের সিদ্ধান্ত, 2026-10-25)
+
+শুধু তখনই, যখন প্রমাণ দিয়ে বাগ **নিশ্চিত** (`rootCauseStatus: CONFIRMED` + `technicalChangeType: BUG_FIX`) — অনুমান (`LIKELY`) হলে কোনো PR নয়।
+
+1. `fix-start --ticket-id <id> --repository <repo>` — প্রোফাইলে `github` আছে এমন রিপোজিটরিতেই; `origin/<baseBranch>` থেকে নতুন `ai-fix/<টিকিট নম্বর>` branch, **আলাদা git worktree**-তে (`~/.config/peopledesk-support-analyst/worktrees/`) — ডেভেলপারের নিজের checkout-এ কিছু বদলায় না।
+2. সেখানে সবচেয়ে ছোট ফিক্স **এবং একটি regression টেস্ট** (রিপোজিটরির নিজস্ব `CLAUDE.md` মেনে)।
+3. `fix-open --ticket-id <id> --repository <repo> --title "<শিরোনাম>" --analysis <file>` — `git commit --no-verify` ও `git push --no-verify` (hook চলে না), তারপর `gh pr create`। PR-এর বর্ণনায় Project Tracker লিংক, সমস্যা, মূল কারণ, ফিক্স, যোগ করা টেস্ট এবং "**hook চালানো হয়নি — merge-এর আগে ডেভেলপার টেস্ট চালিয়ে যাচাই করবেন**" সতর্কতা। টেস্ট ফাইল না থাকলে বা পরিবর্তন খালি হলে `fix-open` প্রত্যাখ্যান করে।
+4. PR-এর লিংক analysis-এর `fixPullRequests`-এ যায় → HTML রিপোর্ট (`strAIFeadbackWithHTML`), প্লেইন টেক্সট ও Google Chat card-এ দেখায়।
+5. **এজেন্ট কখনো merge করে না**, base branch-এ push করে না, deploy করে না।
+
+`save` যাচাই করে: নিশ্চিত বাগে PR অথবা `fixNotOpenedReason` (যেমন ফিক্সটি stored procedure-এ) থাকতেই হবে; আর নিশ্চিত নয় এমন বিশ্লেষণে PR থাকলে প্রত্যাখ্যান।
+
+**নীতিগত ব্যতিক্রম:** `--no-verify` সাধারণভাবে নিষিদ্ধ (testing policy)। শুধু এই এজেন্টের `fix-open`-এর জন্য মালিকের লিখিত ব্যতিক্রম যোগ করা হয়েছে — `peopledesk-business-ai/instructions/testing-policy.md` ("On `--no-verify`"), `peopledesk-business-ai/CLAUDE.md` ও workspace `CLAUDE.md`-তে। regression টেস্ট তবুও বাধ্যতামূলক।
+
 ### প্রমাণের নিয়ম
 
 - পর্যবেক্ষিত প্রমাণ ও অনুমান আলাদা রাখা।
@@ -344,9 +359,15 @@ begin ──► next ──► (টিকিট নেই?) ──হ্যা�
 
 ---
 
+### Project Tracker ও ফিক্স PR লিংক
+
+- প্রোফাইলের `trackerTicketUrl` (PeopleDesk: `https://pt.ibos.io/support/tickets/view/{ticketId}`) থেকে প্রতিটি টিকিটের লিংক তৈরি হয় — শুধু সংখ্যাসূচক আইডি বসে।
+- HTML রিপোর্টে: নির্বাহী সারাংশ কার্ডের নিচে নীল "Project Tracker-এ খুলুন" ও বেগুনি "ফিক্স PR" বোতাম; "১. টিকিটের তথ্য" ও "১১. প্রস্তাবিত সমাধান" অংশেও লিংক। প্লেইন টেক্সটে পূর্ণ URL।
+- **লিংক নিরাপত্তা:** `href` শুধু `https`-এ এবং শুধু অনুমোদিত হোস্টে (`github.com` ও ট্র্যাকারের হোস্ট) — রেন্ডারার অন্য যেকোনো লিংককে সাধারণ টেক্সট হিসেবে দেখায়, আর আউটপুট-গেট অননুমোদিত `href` থাকলে সংরক্ষণ আটকায়।
+
 ### Google Chat নোটিফিকেশন
 
-- প্রতিটি টিকিট সফলভাবে `SAVED` হলে PeopleDesk-এর Google Chat space-এ একটি card যায়: টিকিট নম্বর, বিষয়, রঙিন শ্রেণিবিন্যাস (ক্যাটাগরি, লেভেল, আস্থা, পরিবর্তনের ধরন, সুপারিশ) এবং বাংলা + ইংরেজিতে সমস্যা, প্রস্তাবিত সমাধান ও ইস্যুর ক্ষেত্র।
+- প্রতিটি টিকিট সফলভাবে `SAVED` হলে PeopleDesk-এর Google Chat space-এ একটি card যায়: **Project Tracker টিকিট নম্বর ও আইডি (ক্লিক করলে `https://pt.ibos.io/support/tickets/view/<intSupportTicketId>` খোলে)**, ফিক্স PR থাকলে বেগুনি "Review fix PR" বোতাম, বিষয়, রঙিন শ্রেণিবিন্যাস (ক্যাটাগরি, লেভেল, আস্থা, পরিবর্তনের ধরন, সুপারিশ) এবং বাংলা + ইংরেজিতে সমস্যা, প্রস্তাবিত সমাধান ও ইস্যুর ক্ষেত্র।
 - কাস্টমারের মূল বর্ণনা **পাঠানো হয় না**।
 - Webhook URL-এ key ও token থাকে — এটি সিক্রেট; শুধু লোকাল config (`googleChatWebhookUrl`) বা `PDSA_GOOGLE_CHAT_WEBHOOK`-এ থাকে, রিপোজিটরিতে কখনো নয়। শুধু `https://chat.googleapis.com/v1/spaces/` দিয়ে শুরু হওয়া URL গ্রহণযোগ্য।
 - Dry-run-এ পোস্ট হয় না; card-এর JSON preview ফোল্ডারে লেখা হয়। `--no-notify` দিয়ে বন্ধ করা যায়।
@@ -430,6 +451,8 @@ UPDATE t
 
 কনফিগ ফাইল (সিক্রেট, প্রতি মেশিনে): `--config <path>` → `PDSA_CONFIG` → `~/.config/peopledesk-support-analyst/config.json` (রিপোজিটরির বাইরে, `chmod 600`)।
 
+**ক্রেডেনশিয়াল শুধু প্রোফাইল-ভিত্তিক:** DB লগইন ও Chat webhook থাকে শুধু `profiles.<id>`-এর ভেতরে, লেখা হয় `peopledesk-support-analyze --profile <id> setup` দিয়ে — ব্যবহারকারী নিজের terminal-এ টাইপ করেন (password লুকানো), chat-এ কখনো নয়। উপরের shared অংশে লগইন থাকলে CLI চলে না; `setup` অন্য প্রোফাইলের লগইন বা webhook পুনঃব্যবহার করতে দেয় না। ফলে একই মেশিনে অন্য প্রোডাক্টের প্রোফাইল কখনো PeopleDesk-এর ক্রেডেনশিয়াল ব্যবহার করতে পারে না।
+
 মান (উচ্চ থেকে নিম্ন): `PDSA_*` environment variable (`PDSA_DB_SERVER`, `PDSA_DB_PORT`, `PDSA_DB_NAME`, `PDSA_DB_USER`, `PDSA_DB_PASSWORD`, `PDSA_WORKSPACE_ROOT`, `PDSA_GOOGLE_CHAT_WEBHOOK`) → কনফিগের `profiles.<id>` অংশ → কনফিগের উপরের অংশ → প্রোফাইল → ডিফল্ট।
 
 প্রোডাক্টের পরিচয় (কোড, আইডি, ভিউ, রিপোজিটরি) শুধু প্রোফাইল বা `profiles.<id>` থেকে আসে, কনফিগের উপরের অংশ থেকে কখনো নয় — ফলে এক মেশিনে একাধিক প্রোডাক্ট চালালেও কোড বা webhook মিশে যায় না।
@@ -452,16 +475,26 @@ bash install.sh
 
 ### ব্যবহার
 
+কোনো flag মুখস্থ রাখতে হয় না — কমান্ড টাইপ করলেই সংকেত দেখায়, আর সহজ ভাষায় লেখা যায়:
+
 ```text
-/support:peopledesk                 # ডিফল্ট limit 5
-/support:peopledesk --limit 1 --dry-run
-/support:peopledesk --ticket-id 12345
+/support:peopledesk                         # অপেক্ষমাণ টিকিটের তালিকা দেখিয়ে বেছে নিতে বলে
+/support:peopledesk 3                       # পুরনো ৩টি টিকিট, লাইভ
+/support:peopledesk 1 dry                   # ১টি টিকিট, শুধু প্রিভিউ (DB-তে লেখা নয়)
+/support:peopledesk TKT-20261025035051      # নির্দিষ্ট টিকিট — টিকিট নম্বর দিয়ে
+/support:peopledesk 19589                   # নির্দিষ্ট টিকিট — আইডি দিয়ে
+/support:peopledesk https://pt.ibos.io/support/tickets/view/19589   # Project Tracker লিংক দিয়ে
 ```
+
+**নির্দিষ্ট টিকিট সবসময় আবার প্রসেস হয়:** টিকিট নম্বর, আইডি বা লিংক দিলে টিকিটটি আগে "পড়া" (`IsReadFromPlatform = 1`) হিসেবে চিহ্নিত থাকলেও বা আগে বিশ্লেষণ হয়ে থাকলেও নতুন করে পুরো বিশ্লেষণ হয় (`next --ticket` → `save --reprocess`)। আপডেট তবুও শুধু ওই একটি টিকিট, ওই প্রোডাক্টের, তিনটি কলামে, ট্রানজ্যাকশনে ঠিক এক রো। আগের বিশ্লেষণ থাকলে overwrite-এর আগে লোকাল কপি রাখা হয় (`previews/ticket-<id>.previous-<সময়>.html|.txt`)। নম্বর ছাড়া রান (`3`, `dry`, তালিকা) আগের মতোই শুধু অপেক্ষমাণ টিকিট নেয়।
+
+কিছু না দিলে এজেন্ট `pending` দিয়ে সবচেয়ে পুরনো ১০টি অপেক্ষমাণ টিকিট (নম্বর, বিষয়, মেনু, অগ্রাধিকার, তারিখ) ও মোট সংখ্যা দেখিয়ে অপশন দেয়: "পুরনো ৫টি", "১টি প্রিভিউ", "সব", "নির্দিষ্ট টিকিট"। শুরুর আগে এক লাইনে নিশ্চিত করে কী চলবে।
 
 ```bash
 peopledesk-support-analyze doctor                  # read-only discovery (সব প্রোডাক্ট, কলাম, ফ্ল্যাগ)
 peopledesk-support-analyze begin [--dry-run]
-peopledesk-support-analyze next [--ticket-id <id>]
+peopledesk-support-analyze pending [--limit N]           # অপেক্ষমাণ টিকিটের তালিকা (read-only)
+peopledesk-support-analyze next [--ticket <id | TKT-… | Project Tracker URL>]
 peopledesk-support-analyze save --ticket-id <id> --analysis <file> [--dry-run --out <dir>] [--no-notify]
 peopledesk-support-analyze notify --ticket-id <id> --analysis <file> [--dry-run]
 peopledesk-support-analyze end
@@ -492,6 +525,16 @@ peopledesk-support-analyze --help                   # সব কমান্ড�
 - `InsertDate` ও `dteIssueDate` কোনো রো-তে আলাদা নয়, তাই তারিখ-কলামের প্রশ্ন আর প্রাসঙ্গিক নয়।
 - **সিদ্ধান্ত (মালিক, 2026-10-22):** শুধু PeopleDesk (`PD`)।
 - **অবস্থা:** ✅ 2026-10-22-এ চালানো হয়েছে — ১,৫৬৪টি PD টিকিটে `IsReadFromPlatform = 1`; পুরনো মান `dbo.tblSupportTicket_IsReadBackfill_20261022`-এ সংরক্ষিত; অন্য কোনো প্রোডাক্টের রো বদলায়নি। ভিউতে এখন ৬টি অপেক্ষমাণ টিকিট (সবচেয়ে পুরনো `TKT-20261018055524`)।
+
+---
+
+### ১৭.১ দ্বিতীয় ব্যাকফিল — সব প্রোডাক্ট, ২৫-১০-২০২৬-এর আগের টিকিট
+
+- **অনুরোধ (মালিক, 2026-10-25):** আজকের আগের **সব প্রোডাক্টের** সব পুরনো টিকিটে `IsReadFromPlatform = 1`।
+- **শর্ত:** `InsertDate < 2026-10-25` এবং `ISNULL(IsReadFromPlatform,0) = 0`।
+- **ফলাফল:** ✅ মোট **৭,৭৬২** টিকিট — MGM 6,038 · POS 883 · IT 432 · APON 374 · PRJ 24 · PD 11। backup ও আপডেটের সংখ্যা মিলেছে, এক ট্রানজ্যাকশনে commit।
+- **Backup:** `dbo.tblSupportTicket_IsReadBackfill_20261025` (`intSupportTicketId`, `intProductId`, পুরনো মান) — rollback: backup join করে পুরনো মান ফিরিয়ে দেওয়া।
+- **পরে:** আজকের আগের কোনো অপেক্ষমাণ টিকিট নেই; আজকের ১৩টি (সব প্রোডাক্ট) অপেক্ষমাণ, যার ৩টি PeopleDesk ভিউতে। PD-এর আগের অবিশ্লেষিত ৫টি টিকিটসহ ১১টি PD টিকিট বিশ্লেষণ ছাড়াই read হিসেবে চিহ্নিত হয়েছে।
 
 ---
 
@@ -545,7 +588,8 @@ AI কলের জন্য fixture JSON; ইন্টিগ্রেশন ট
 - [ ] কনকারেন্সি/রিট্রাই আচরণ ডকুমেন্টেড ও নিরাপদ।
 - [ ] HTML অবিশ্বস্ত মার্কআপ/স্ক্রিপ্ট ইনজেকশন থেকে সুরক্ষিত।
 - [ ] টেস্ট চালানো হয়েছে এবং আসল ফলাফল রিপোর্ট করা হয়েছে।
-- [ ] স্পষ্ট অনুমতি ছাড়া কোনো প্রোডাকশন deploy, ডেটা সংশোধন, commit বা push নয়।
+- [ ] স্পষ্ট অনুমতি ছাড়া কোনো প্রোডাকশন deploy, ডেটা সংশোধন, commit বা push নয় — ব্যতিক্রম শুধু নিশ্চিত বাগের ফিক্স PR (§৮.৩), যা কখনো স্বয়ংক্রিয়ভাবে merge হয় না।
+- [ ] Google Chat card ও HTML রিপোর্টে Project Tracker টিকিট লিংক এবং (থাকলে) ফিক্স PR লিংক।
 - [ ] প্রতিটি টিকিটে প্রোফাইলের সব রিপোজিটরি যাচাই — কোডে প্রয়োগকৃত (`repositoryCoverage` + প্রমাণ-পাথ যাচাই)।
 
 ---
