@@ -247,6 +247,21 @@ begin ──► next ──► (টিকিট নেই?) ──হ্যা�
 4. PR-এর লিংক analysis-এর `fixPullRequests`-এ যায় → HTML রিপোর্ট (`strAIFeadbackWithHTML`), প্লেইন টেক্সট ও Google Chat card-এ দেখায়।
 5. **এজেন্ট কখনো merge করে না**, base branch-এ push করে না, deploy করে না।
 
+**PR খোলার আগে এজেন্ট নিজে যাচাই করে (মালিকের সিদ্ধান্ত, 2026-10-26):** hook `--no-verify` দিয়ে বাদ গেলেও `fix-open` commit-এর আগে worktree-তে রিপোজিটরির নিজস্ব ধাপগুলো চালায় — প্রোফাইলের `verify` অনুযায়ী:
+
+| রিপোজিটরি | ধাপ |
+|---|---|
+| `app-api` | `dotnet build Api/Api.csproj` → `./run-tests.sh` (লোকাল Docker SQL Server) |
+| `app-front` | পরিবর্তিত ফাইলে `eslint` → `yarn test` (Vitest) → `yarn build` (`node_modules` ডেভেলপার checkout থেকে ধার, commit-এ বাদ) |
+| `app-scheduler-api` | `dotnet build` → `./run-tests.sh` |
+| `app-report-api`, `app-signalr-api` | `dotnet build` |
+
+- কোনো ধাপ ব্যর্থ হলে **PR খোলা হয় না** (`VERIFY_FAILED`, শেষ ৪০ লাইন আউটপুটসহ) — worktree থেকে যায়, এজেন্ট ঠিক করে আবার চালায়; না পারলে `fixNotOpenedReason`।
+- সব ধাপ সফল হলে সাধারণ PR; কোনো ধাপ চালানো না গেলে বা SQL স্ক্রিপ্ট থাকলে **draft PR** — "ম্যানুয়াল build ও যাচাই প্রয়োজন"।
+- প্রতিটি ধাপের ফলাফল PR-এর বর্ণনা, টিকিটের রিপোর্ট ও Chat thread-এ দেখায়।
+
+**ডেটাবেস-ফার্স্ট:** এজেন্ট কখনো ডেটাবেসে column, table, SP বা function যোগ/পরিবর্তন করে না। প্রয়োজন হলে SQL স্ক্রিপ্ট (`app-api/Api/Migrations/<লেখক>_<তারিখ>_<বিবরণ>.sql`) PR-এ দেয়; সেক্ষেত্রে টেস্ট বাধ্যতামূলক নয়, টেস্ট-ধাপ বাদ (`DB_SCRIPT_PENDING`), build চলে, PR draft — ডেভেলপার স্ক্রিপ্ট চালিয়ে, build ও টেস্ট করে merge করবেন।
+
 `save` যাচাই করে: নিশ্চিত বাগে PR অথবা `fixNotOpenedReason` (যেমন ফিক্সটি stored procedure-এ) থাকতেই হবে; আর নিশ্চিত নয় এমন বিশ্লেষণে PR থাকলে প্রত্যাখ্যান।
 
 **নীতিগত ব্যতিক্রম:** `--no-verify` সাধারণভাবে নিষিদ্ধ (testing policy)। শুধু এই এজেন্টের `fix-open`-এর জন্য মালিকের লিখিত ব্যতিক্রম যোগ করা হয়েছে — `peopledesk-business-ai/instructions/testing-policy.md` ("On `--no-verify`"), `peopledesk-business-ai/CLAUDE.md` ও workspace `CLAUDE.md`-তে। regression টেস্ট তবুও বাধ্যতামূলক।
@@ -365,7 +380,13 @@ begin ──► next ──► (টিকিট নেই?) ──হ্যা�
 - HTML রিপোর্টে: নির্বাহী সারাংশ কার্ডের নিচে নীল "Project Tracker-এ খুলুন" ও বেগুনি "ফিক্স PR" বোতাম; "১. টিকিটের তথ্য" ও "১১. প্রস্তাবিত সমাধান" অংশেও লিংক। প্লেইন টেক্সটে পূর্ণ URL।
 - **লিংক নিরাপত্তা:** `href` শুধু `https`-এ এবং শুধু অনুমোদিত হোস্টে (`github.com` ও ট্র্যাকারের হোস্ট) — রেন্ডারার অন্য যেকোনো লিংককে সাধারণ টেক্সট হিসেবে দেখায়, আর আউটপুট-গেট অননুমোদিত `href` থাকলে সংরক্ষণ আটকায়।
 
-### Google Chat নোটিফিকেশন
+### Google Chat নোটিফিকেশন — টিকিটপ্রতি একটি thread
+
+- **মূল মেসেজ (space-এ):** ছোট card — লেভেলের রঙিন চিহ্ন (🟢 L1 · 🔵 L2 · 🟠 L3 · 🔴 L4), টিকিট নম্বর, বিষয়, সাপোর্ট লেভেল, ইস্যুর ধরন, fix PR (থাকলে) ও "Project Tracker-এ খুলুন" বোতাম। অনেক টিকিট একসাথে এলেও space পড়তে সহজ থাকে।
+- **Thread-এর reply:** বাংলা অংশ পুরো, তারপর ইংরেজি অংশ পুরো — শ্রেণিবিন্যাস, সমস্যা, প্রস্তাবিত সমাধান, ইস্যুর ক্ষেত্র, fix PR, রিপোজিটরি যাচাই। পূর্ণ বিস্তারিত রিপোর্ট শুধু টিকিটে (`strAIFeadbackWithHTML`)।
+- প্রতিটি বিশ্লেষণে নতুন thread (`threadKey = pdsa-<ticketId>-<সময়>`); মূল মেসেজ না পৌঁছালে reply পাঠানো হয় না; ফলাফল `sent` ও `threadSent`।
+
+### Google Chat নোটিফিকেশন — বিস্তারিত
 
 - প্রতিটি টিকিট সফলভাবে `SAVED` হলে PeopleDesk-এর Google Chat space-এ একটি card যায়: **Project Tracker টিকিট নম্বর ও আইডি (ক্লিক করলে `https://pt.ibos.io/support/tickets/view/<intSupportTicketId>` খোলে)**, ফিক্স PR থাকলে বেগুনি "Review fix PR" বোতাম, বিষয়, রঙিন শ্রেণিবিন্যাস (ক্যাটাগরি, লেভেল, আস্থা, পরিবর্তনের ধরন, সুপারিশ) এবং বাংলা + ইংরেজিতে সমস্যা, প্রস্তাবিত সমাধান ও ইস্যুর ক্ষেত্র।
 - কাস্টমারের মূল বর্ণনা **পাঠানো হয় না**।
