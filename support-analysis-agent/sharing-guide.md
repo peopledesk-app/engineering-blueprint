@@ -14,7 +14,7 @@
 | CLI (ডেটাবেস পড়া, যাচাই, রেন্ডার, সংরক্ষণ, Google Chat) | `peopledesk-kb/scripts/support-analyst/` | না |
 | প্রোডাক্ট প্রোফাইল | `profiles/<id>.json` | **হ্যাঁ — শুধু এটিই** |
 | Golden reference (প্রতিটি রিপোজিটরিতে কী দেখতে হবে) | `golden-reference.md` | না (প্রয়োজনে নিজস্ব রিপোজিটরির নোট যোগ) |
-| Slash command (`/support:<id>`) | `commands/support-command.md.tmpl` থেকে স্বয়ংক্রিয় তৈরি | না |
+| Slash command (`/support:<id>`, `/support:<id>-prod-debug`) | `commands/support-command.md.tmpl` থেকে `sync-commands` দিয়ে তৈরি, `commands/support/<id>*.md` হিসেবে **রিপোজিটরিতে commit করা** (শুধু ওয়ার্কস্পেস-আপেক্ষিক পাথ) | না — প্রোফাইল বদলালে শুধু `sync-commands` চালিয়ে commit |
 | পেন্ডিং-টিকিট ভিউ | `view-sql` কমান্ড প্রোফাইল থেকে স্ক্রিপ্ট তৈরি করে | না (রিভিউ করে DBA চালাবেন) |
 | সিক্রেট (DB লগইন, Chat webhook) | প্রতিটি মেশিনে `~/.config/peopledesk-support-analyst/config.json` | হ্যাঁ — কখনো শেয়ার/commit নয় |
 
@@ -84,21 +84,26 @@ peopledesk-support-analyze --profile <id> setup
 
 ## ৩. নতুন টিম চালু করার ধাপ
 
+### কমান্ড কীভাবে সবার কাছে পৌঁছায়
+
+কমান্ডগুলো আর প্রতিটি মেশিনে আলাদা করে তৈরি হয় না। সেগুলো `peopledesk-kb/scripts/support-analyst/commands/support/`-এ commit করা থাকে; installer সেগুলো ওয়ার্কস্পেস রুটের `.claude/commands/support/`-এ কপি করে, আর `./update-repos` প্রতিটি pull-এর পর সেই কপি হালনাগাদ করে। ফলে PeopleDesk-এর নতুন সদস্যের জন্য শুধু তিনটি কাজ: `./update-repos` (বা repo clone), `install.sh`, আর নিজের terminal-এ `setup` — বিস্তারিত [replication-prompt.md](replication-prompt.md)-এর Part A। Claude Code অবশ্যই **ওয়ার্কস্পেস রুটে** খুলতে হবে, কারণ কমান্ডের সব পাথ সেখান থেকে আপেক্ষিক।
+
 ### পথ A — একই ওয়ার্কস্পেস কাঠামো (সুপারিশকৃত)
 
-টিমের নিজস্ব ওয়ার্কস্পেস ফোল্ডারে তাদের সব রিপোজিটরি পাশাপাশি থাকবে (যেমন `managerium-workspace/mgm-api`, `mgm-front`, ...)।
+টিমের নিজস্ব ওয়ার্কস্পেস ফোল্ডারে তাদের সব রিপোজিটরি পাশাপাশি থাকবে (যেমন `managerium-workspace/mgm-api`, `mgm-front`, ...), আর `peopledesk-kb` সেই ফোল্ডারের ভেতরেই clone করা থাকবে।
 
 | # | কাজ | কে | কমান্ড / ফাইল |
 |---|---|---|---|
-| 1 | `support-analyst` ফোল্ডারটি টিমের ওয়ার্কস্পেসে আনা (এই রিপো clone, অথবা ফোল্ডার কপি) | টিম লিড | — |
+| 1 | `peopledesk-kb` রিপোটি টিমের ওয়ার্কস্পেস রুটে clone করা (কপি বা fork নয় — একই kit সবার) | টিম লিড | `git clone … peopledesk-kb` |
 | 2 | প্রোডাক্ট রো যাচাই | টিম লিড | `peopledesk-support-analyze doctor` |
-| 3 | প্রোফাইল তৈরি — `profiles/_template.json` কপি করে `profiles/<id>.json`; প্রোডাক্ট কোড/আইডি, ভিউ নাম, `trackerTicketUrl` (`{ticketId}` সহ), **সব** রিপোজিটরি ও প্রতিটির ভূমিকা, আর ফিক্স PR-যোগ্য কোড রিপোজিটরিতে `github` + `baseBranch` | টিম লিড | `profiles/managerium.json` |
+| 3 | প্রোফাইল তৈরি — `profiles/_template.json` কপি করে `profiles/<id>.json`; প্রোডাক্ট কোড/আইডি, ভিউ নাম, `trackerTicketUrl` (`{ticketId}` সহ), **সব** রিপোজিটরি ও প্রতিটির ভূমিকা, আর ফিক্স PR-যোগ্য কোড রিপোজিটরিতে `github` + `baseBranch` + `verify` (প্রতিটি verify কমান্ড আগে একবার পরিষ্কার checkout-এ চালিয়ে দেখা — যে ধাপ কখনো পাস করে না, তা সব ফিক্স PR আটকে দেয়); তারপর `sync-commands` দিয়ে কমান্ড তৈরি ও `npm test` | টিম লিড | `profiles/managerium.json`, `commands/support/managerium*.md` |
 | 4 | প্রোফাইল থেকে ভিউ স্ক্রিপ্ট তৈরি, রিভিউ, DBA দিয়ে চালানো | টিম লিড + DBA | `peopledesk-support-analyze --profile <id> view-sql > view.sql` |
 | 5 | পুরনো টিকিট বাদ দিতে চাইলে backfill (প্রিভিউ → backup → আপডেট) | DBA | `sql/03-backfill-…sql` (প্রোডাক্ট কোড বদলে) |
-| 6 | ইনস্টল — প্রতিটি প্রোফাইলের জন্য `/support:<id>` কমান্ড তৈরি হয় | প্রতিটি সদস্য | `PDSA_WORKSPACE_ROOT=<ওয়ার্কস্পেস> bash install.sh` |
+| 6 | প্রোফাইল ও তৈরি করা কমান্ড `peopledesk-kb`-এ PR হিসেবে জমা (PeopleDesk টিম রিভিউ করে merge করবে); তারপর প্রতিটি সদস্য ইনস্টল করেন — কমান্ড ওয়ার্কস্পেসের `.claude/commands/support/`-এ যায় | টিম লিড → প্রতিটি সদস্য | `bash peopledesk-kb/scripts/support-analyst/install.sh` |
 | 7 | ক্রেডেনশিয়াল — নিজের terminal-এ `setup` চালিয়ে **নিজের** DB লগইন ও **টিমের নিজস্ব** webhook; `gh auth status` দিয়ে GitHub লগইন যাচাই | প্রতিটি সদস্য | `peopledesk-support-analyze --profile <id> setup` |
-| 8 | প্রথম রান — dry-run, preview দেখে মান যাচাই | টিম লিড | `/support:<id> --limit 1 --dry-run` |
-| 9 | লাইভ রান | টিম | `/support:<id> --limit 5` |
+| 8 | প্রথম রান — dry-run, preview দেখে মান যাচাই | টিম লিড | `/support:<id> 1 dry` |
+| 9 | লাইভ রান | টিম | `/support:<id> 5` |
+| 10 | পরে বিশ্লেষণ বদলালে (যেমন PR পরে খোলা হলো) — একই Google Chat থ্রেডে আপডেট | টিম | `save --update` (থ্রেড রেকর্ডে না থাকলে `--thread <মেসেজ লিংক>`) |
 
 উদাহরণ — `setup` চালানোর পর এক মেশিনে দুই প্রোডাক্ট (প্রতিটির নিজস্ব লগইন ও webhook):
 

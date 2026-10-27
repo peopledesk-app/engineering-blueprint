@@ -138,7 +138,7 @@ peopledesk-ba-studio/
 | `/ba:peopledesk:publish REQ-…` | **শুধু অনুমোদিত** রিকোয়ারমেন্টে Project Tracker টিকিট + Chat |
 | `/ba:peopledesk:status` | সব রিকোয়ারমেন্টের অবস্থা |
 
-**নামকরণ:** `/ba:<প্রোডাক্ট>:<কাজ>` — প্রোডাক্টের নাম কমান্ডেই থাকে, তাই ভুল প্রোডাক্টে কাজ হওয়ার ঝুঁকি নেই এবং অন্য টিম একই কাঠামো পায় (`/ba:managerium:new`, `/ba:apon:new` …)। Claude Code ফোল্ডার থেকে নাম তৈরি করে: `~/.claude/commands/ba/peopledesk/new.md` → `/ba:peopledesk:new`; সাপোর্ট এজেন্টের মতো প্রোডাক্ট প্রোফাইল থেকে `install.sh` সব কমান্ড তৈরি করবে। দুই স্তরের ফোল্ডার-নাম বাস্তবায়নের শুরুতে যাচাই করা হবে; কাজ না করলে বিকল্প `/ba:peopledesk-new`।
+**নামকরণ:** `/ba:<প্রোডাক্ট>:<কাজ>` — প্রোডাক্টের নাম কমান্ডেই থাকে, তাই ভুল প্রোডাক্টে কাজ হওয়ার ঝুঁকি নেই এবং অন্য টিম একই কাঠামো পায় (`/ba:managerium:new`, `/ba:apon:new` …)। Claude Code ফোল্ডার থেকে নাম তৈরি করে: `.claude/commands/ba/peopledesk/new.md` → `/ba:peopledesk:new` (যাচাই করা, কাজ করে)। সাপোর্ট এজেন্টের মতো প্রোডাক্ট প্রোফাইল থেকে `ba-studio sync-commands` সব কমান্ড তৈরি করে `commands/ba/<প্রোডাক্ট>/`-এ commit করা হয়; `install.sh` সেগুলো ওয়ার্কস্পেস রুটের `.claude/commands/ba/`-এ কপি করে, আর `./update-repos` প্রতিটি pull-এর পর কপি হালনাগাদ করে — তাই পুরো টিম একই সংস্করণ পায়। সেটআপের ধাপ: [replication-prompt.md](replication-prompt.md)।
 
 ---
 

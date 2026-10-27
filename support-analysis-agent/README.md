@@ -113,7 +113,7 @@ PeopleDesk-কে এই টেবিল থেকে **resolve** করা হ�
 মূল নীতি: **Claude Code নিজেই বিশ্লেষক (analyzer)**, আর CLI হলো একটি নির্ধারিত (deterministic), টেস্টযোগ্য টুল যা ডেটাবেস পড়া, যাচাই, রেন্ডার ও সংরক্ষণ করে। Slash command শুধু ওয়ার্কফ্লো চালায় — ব্যবসায়িক যুক্তি CLI-তে।
 
 ```
-/support:peopledesk  (পাতলা ~/.claude/commands/support/peopledesk.md)
+/support:peopledesk  (commit করা commands/support/peopledesk.md → ওয়ার্কস্পেসের .claude/commands/support/)
         │
         ▼
 Claude Code সেশন (AI বিশ্লেষণ, ওয়ার্কস্পেস কোড পড়া)
@@ -507,7 +507,7 @@ bash install.sh
 
 1. `npm install` (ডিপেন্ডেন্সি: `mssql`)।
 2. `~/.local/bin/peopledesk-support-analyze` symlink — PATH থেকে যেকোনো ডিরেক্টরিতে চলে; CLI নিজের অবস্থান থেকে রিপোজিটরি পাথ বের করে, বর্তমান ডিরেক্টরির উপর নির্ভর করে না।
-3. প্রতিটি প্রোফাইলের জন্য একটি **ইউজার-লেভেল** Claude Code কমান্ড — `commands/support-command.md.tmpl` থেকে তৈরি, যেমন `~/.claude/commands/support/peopledesk.md` → `/support:peopledesk` (সাবফোল্ডার `support/` থেকে `support:` namespace আসে)। কমান্ডে বাধ্যতামূলক রিপোজিটরির টেবিল, golden reference ও ওয়ার্কস্পেস পাথ থাকে; ব্যবসায়িক যুক্তি CLI-তে।
+3. **শেয়ার করা কমান্ড** — `commands/support-command.md.tmpl` থেকে প্রতিটি প্রোফাইলের জন্য `sync-commands` দিয়ে তৈরি, শুধু ওয়ার্কস্পেস-আপেক্ষিক পাথসহ `commands/support/<id>.md` ও `<id>-prod-debug.md` হিসেবে রিপোজিটরিতে commit করা। `install.sh` সেগুলো ওয়ার্কস্পেস রুটের `.claude/commands/support/`-এ কপি করে (→ `/support:peopledesk`; সাবফোল্ডার `support/` থেকে `support:` namespace আসে), আর `./update-repos` প্রতিটি pull-এর পর কপিটি হালনাগাদ করে — তাই পুরো টিম একই, রিভিউ করা সংস্করণ চালায়। পুরনো ইউজার-লেভেল কপি (`~/.claude/commands/support/`) মুছে ফেলা হয়। টেমপ্লেট বা প্রোফাইল বদলালে `sync-commands` চালিয়ে commit করতে হয়; পুরনো হয়ে গেলে একটি টেস্ট ফেল করে।
 4. কনফিগ ফাইল না থাকলে টেমপ্লেট তৈরি করে (মান আপনাকে বসাতে হবে)।
 
 ### ব্যবহার

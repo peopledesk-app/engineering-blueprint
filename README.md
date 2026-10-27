@@ -26,8 +26,8 @@ The homepage you are reading stays deliberately small: it only tells you what ex
 | Concept | What it covers | Entry point |
 |---------|----------------|-------------|
 | 🧠 **PeopleDesk Knowledge-Driven AI Engineering Framework (PKAEF)** | How the PeopleDesk platform works, our architecture and engineering approach, and the transformation journey — past, present, and future | **[Open the overview →](pkaef/README.md)** |
-| 🧩 **BA Requirement Studio** | Turns business-team notes into a client document, BRS, clickable HTML mockup and developer task, then a Project Tracker ticket after approval — code in `peopledesk-ba-studio` (plan in Bangla) | **[Open the plan →](ba-requirement-studio/implementation-plan.md)** |
-| 🎫 **PeopleDesk Client Support Analysis Agent** | Local agent that reads pending PeopleDesk support tickets, analyses them against the workspace code, and stores a Bangla-first bilingual report on the ticket (documented in Bangla) | **[Open the overview →](support-analysis-agent/README.md)** |
+| 🧩 **BA Requirement Studio** | Turns business-team notes into a client document, BRS, clickable HTML mockup and developer task, then a Project Tracker ticket after approval — code in `peopledesk-ba-studio` (plan in Bangla) | **[Open the plan →](ba-requirement-studio/implementation-plan.md)** · [setup prompt](ba-requirement-studio/replication-prompt.md) |
+| 🎫 **PeopleDesk Client Support Analysis Agent** | Local agent that reads pending PeopleDesk support tickets, analyses them against the workspace code, and stores a Bangla-first bilingual report on the ticket (documented in Bangla) | **[Open the overview →](support-analysis-agent/README.md)** · [setup prompt](support-analysis-agent/replication-prompt.md) |
 | ✅ **Software Development Team — WHAT List (Executive View)** | Every outcome a software development team must deliver across the full lifecycle — 13 areas, stated as WHAT, never HOW | **[Open the overview →](sdt-what-list/README.md)** |
 
 > More concepts (e.g. a Medical Project, a database design, a business process) will appear here as new top-level folders, each with its own entry point.
