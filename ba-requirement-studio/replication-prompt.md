@@ -33,9 +33,11 @@ Set up the PeopleDesk BA Requirement Studio on this machine. The studio and the
    PeopleDesk repositories (app-front at least, for the mockups). List what is missing
    (./update-repos clones it).
 2. Install: `bash peopledesk-kb/scripts/mac-linux/install-workspace-commands.sh` (if
-   peopledesk-kb is present), then `bash peopledesk-ba-studio/install.sh`. Report the
-   commands it installed. If ~/.local/bin is not on PATH, tell me the exact line to add
-   to my shell profile (do not edit it yourself).
+   peopledesk-kb is present), then `bash peopledesk-ba-studio/install.sh`. On Windows use
+   `powershell -ExecutionPolicy Bypass -File peopledesk-kb\scripts\windows\install-workspace-commands.ps1`
+   and `... -File peopledesk-ba-studio\install.ps1`. Report the commands it installed. If
+   ~/.local/bin is not on PATH, tell me the exact line (or Windows setting) to add (do not
+   change it yourself).
 3. Run `npm test` in peopledesk-ba-studio/tools/ba-cli and report the result.
 4. Google Chat — STOP and tell me: "Open ~/.config/peopledesk-ba-studio/config.json in
    your own editor and add, under "profiles": { "peopledesk": { "googleChatWebhookUrl":
@@ -83,7 +85,8 @@ Google Chat webhook ..... I add it MYSELF in step 5. Do NOT ask me for it in thi
 
 == Steps — report each result and wait where it says STOP ==
 
-1. Install the studio: `bash peopledesk-ba-studio/install.sh`. If ~/.local/bin is not on
+1. Install the studio: `bash peopledesk-ba-studio/install.sh` (Windows:
+   `powershell -ExecutionPolicy Bypass -File peopledesk-ba-studio\install.ps1`). If ~/.local/bin is not on
    PATH, tell me the line to add; until then use
    `node peopledesk-ba-studio/tools/ba-cli/bin/ba-studio.js`. Run `npm test` in
    peopledesk-ba-studio/tools/ba-cli and report the result.
@@ -111,7 +114,7 @@ Google Chat webhook ..... I add it MYSELF in step 5. Do NOT ask me for it in thi
    peopledesk-ba-studio with profiles/<id>.json and commands/ba/<id>/*.md (plus any kit
    change I approved, with tests), show me the diff, and open a pull request only when I
    say so — the PeopleDesk team reviews and merges it. Then every member of our team gets
-   the commands with `./update-repos` (or a pull and install.sh). Re-run install.sh here
+   the commands with `./update-repos` (Windows: `update-repos.ps1`), or a pull and the installer. Re-run the installer here
    and tell me to reload Claude Code at the workspace root.
 
 5. Google Chat — STOP and tell me: "Open ~/.config/peopledesk-ba-studio/config.json in

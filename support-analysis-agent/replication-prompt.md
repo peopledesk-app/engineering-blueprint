@@ -34,9 +34,11 @@ Set up the PeopleDesk Client Support Analysis Agent on this machine. The kit and
    listed in peopledesk-kb/scripts/support-analyst/profiles/peopledesk.json. List any
    that are missing (./update-repos clones them).
 2. Install: `bash peopledesk-kb/scripts/mac-linux/install-workspace-commands.sh`, then
-   `bash peopledesk-kb/scripts/support-analyst/install.sh`. Report the commands it
-   installed. If ~/.local/bin is not on PATH, tell me the exact line to add to my shell
-   profile (do not edit it yourself).
+   `bash peopledesk-kb/scripts/support-analyst/install.sh`. On Windows use
+   `powershell -ExecutionPolicy Bypass -File peopledesk-kb\scripts\windows\install-workspace-commands.ps1`
+   and `... -File peopledesk-kb\scripts\support-analyst\install.ps1`. Report the commands it
+   installed. If ~/.local/bin is not on PATH, tell me the exact line (or Windows setting) to
+   add (do not change it yourself).
 3. Run `npm test` in peopledesk-kb/scripts/support-analyst and report the result.
 4. Credentials — STOP and tell me: "Open a separate terminal (not this chat) and run:
      peopledesk-support-analyze --profile peopledesk setup
@@ -90,6 +92,7 @@ the `setup` command in my own terminal. Do NOT ask me for them in this chat.
 
 1. Install the kit.
    bash peopledesk-kb/scripts/support-analyst/install.sh
+   (Windows: powershell -ExecutionPolicy Bypass -File peopledesk-kb\scripts\support-analyst\install.ps1)
    (it installs the CLI dependencies, links peopledesk-support-analyze into ~/.local/bin
    and installs the shared commands into this workspace's .claude/commands/support/).
    If ~/.local/bin is not on PATH, tell me the line to add; until then use
@@ -158,14 +161,14 @@ the `setup` command in my own terminal. Do NOT ask me for them in this chat.
    rule and propose a one-line written exception limited to support-agent fix PRs
    (regression test still required, never auto-merged). Apply it only after I approve.
 
-8. Share it. Re-run `bash peopledesk-kb/scripts/support-analyst/install.sh` so this
+8. Share it. Re-run `bash peopledesk-kb/scripts/support-analyst/install.sh` (Windows: `install.ps1`) so this
    workspace gets /support:<id> (dev data only) and /support:<id>-prod-debug (may read
    production, read-only); tell me to reload Claude Code at the workspace root.
    The profile and its generated commands belong in the shared kit: prepare a branch in
    peopledesk-kb with profiles/<id>.json and commands/support/<id>*.md (plus any approved
    kit change, with tests), show me the diff, and open a pull request only when I say
    so — the PeopleDesk team reviews and merges it. Then every member of our team gets
-   the commands with `./update-repos` (or a pull and install.sh).
+   the commands with `./update-repos` (Windows: `update-repos.ps1`), or a pull and the installer.
    Verify with `peopledesk-support-analyze --profile <id> query --db dev --sql
    "SELECT DB_NAME() AS db"` (read-only).
 

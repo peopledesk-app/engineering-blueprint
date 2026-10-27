@@ -86,7 +86,7 @@ peopledesk-support-analyze --profile <id> setup
 
 ### কমান্ড কীভাবে সবার কাছে পৌঁছায়
 
-কমান্ডগুলো আর প্রতিটি মেশিনে আলাদা করে তৈরি হয় না। সেগুলো `peopledesk-kb/scripts/support-analyst/commands/support/`-এ commit করা থাকে; installer সেগুলো ওয়ার্কস্পেস রুটের `.claude/commands/support/`-এ কপি করে, আর `./update-repos` প্রতিটি pull-এর পর সেই কপি হালনাগাদ করে। ফলে PeopleDesk-এর নতুন সদস্যের জন্য শুধু তিনটি কাজ: `./update-repos` (বা repo clone), `install.sh`, আর নিজের terminal-এ `setup` — বিস্তারিত [replication-prompt.md](replication-prompt.md)-এর Part A। Claude Code অবশ্যই **ওয়ার্কস্পেস রুটে** খুলতে হবে, কারণ কমান্ডের সব পাথ সেখান থেকে আপেক্ষিক।
+কমান্ডগুলো আর প্রতিটি মেশিনে আলাদা করে তৈরি হয় না। সেগুলো `peopledesk-kb/scripts/support-analyst/commands/support/`-এ commit করা থাকে; installer সেগুলো ওয়ার্কস্পেস রুটের `.claude/commands/support/`-এ কপি করে, আর `./update-repos` প্রতিটি pull-এর পর সেই কপি হালনাগাদ করে। ফলে PeopleDesk-এর নতুন সদস্যের জন্য শুধু তিনটি কাজ: `./update-repos` (Windows: `update-repos.ps1`), `install.sh` (Windows: `install.ps1`), আর নিজের terminal-এ `setup` — বিস্তারিত [replication-prompt.md](replication-prompt.md)-এর Part A। Claude Code অবশ্যই **ওয়ার্কস্পেস রুটে** খুলতে হবে, কারণ কমান্ডের সব পাথ সেখান থেকে আপেক্ষিক।
 
 ### পথ A — একই ওয়ার্কস্পেস কাঠামো (সুপারিশকৃত)
 
@@ -99,7 +99,7 @@ peopledesk-support-analyze --profile <id> setup
 | 3 | প্রোফাইল তৈরি — `profiles/_template.json` কপি করে `profiles/<id>.json`; প্রোডাক্ট কোড/আইডি, ভিউ নাম, `trackerTicketUrl` (`{ticketId}` সহ), **সব** রিপোজিটরি ও প্রতিটির ভূমিকা, আর ফিক্স PR-যোগ্য কোড রিপোজিটরিতে `github` + `baseBranch` + `verify` (প্রতিটি verify কমান্ড আগে একবার পরিষ্কার checkout-এ চালিয়ে দেখা — যে ধাপ কখনো পাস করে না, তা সব ফিক্স PR আটকে দেয়); তারপর `sync-commands` দিয়ে কমান্ড তৈরি ও `npm test` | টিম লিড | `profiles/managerium.json`, `commands/support/managerium*.md` |
 | 4 | প্রোফাইল থেকে ভিউ স্ক্রিপ্ট তৈরি, রিভিউ, DBA দিয়ে চালানো | টিম লিড + DBA | `peopledesk-support-analyze --profile <id> view-sql > view.sql` |
 | 5 | পুরনো টিকিট বাদ দিতে চাইলে backfill (প্রিভিউ → backup → আপডেট) | DBA | `sql/03-backfill-…sql` (প্রোডাক্ট কোড বদলে) |
-| 6 | প্রোফাইল ও তৈরি করা কমান্ড `peopledesk-kb`-এ PR হিসেবে জমা (PeopleDesk টিম রিভিউ করে merge করবে); তারপর প্রতিটি সদস্য ইনস্টল করেন — কমান্ড ওয়ার্কস্পেসের `.claude/commands/support/`-এ যায় | টিম লিড → প্রতিটি সদস্য | `bash peopledesk-kb/scripts/support-analyst/install.sh` |
+| 6 | প্রোফাইল ও তৈরি করা কমান্ড `peopledesk-kb`-এ PR হিসেবে জমা (PeopleDesk টিম রিভিউ করে merge করবে); তারপর প্রতিটি সদস্য ইনস্টল করেন — কমান্ড ওয়ার্কস্পেসের `.claude/commands/support/`-এ যায় | টিম লিড → প্রতিটি সদস্য | `bash peopledesk-kb/scripts/support-analyst/install.sh` (Windows: `install.ps1`) |
 | 7 | ক্রেডেনশিয়াল — নিজের terminal-এ `setup` চালিয়ে **নিজের** DB লগইন ও **টিমের নিজস্ব** webhook; `gh auth status` দিয়ে GitHub লগইন যাচাই | প্রতিটি সদস্য | `peopledesk-support-analyze --profile <id> setup` |
 | 8 | প্রথম রান — dry-run, preview দেখে মান যাচাই | টিম লিড | `/support:<id> 1 dry` |
 | 9 | লাইভ রান | টিম | `/support:<id> 5` |
