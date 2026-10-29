@@ -11,8 +11,8 @@
 
 | অংশ | কোথায় | প্রতিটি টিমকে বদলাতে হবে? |
 |---|---|---|
-| CLI (ডেটাবেস পড়া, যাচাই, রেন্ডার, সংরক্ষণ, Google Chat) | `peopledesk-kb/scripts/support-analyst/` | না |
-| প্রোডাক্ট প্রোফাইল | `profiles/<id>.json` | **হ্যাঁ — শুধু এটিই** |
+| CLI (ডেটাবেস পড়া, যাচাই, রেন্ডার, সংরক্ষণ, Google Chat) | `peopledesk-kb/scripts/support-analyst/`; অন্য টিমের কাছে `export-kit` প্যাকেজ হিসেবে যায় (ধাপ ৩) | না |
+| প্রোডাক্ট প্রোফাইল | `profiles/<id>.json` — অন্য টিমের ক্ষেত্রে তাদের নিজস্ব কিট রিপোজিটরিতে | **হ্যাঁ — শুধু এটিই** |
 | Golden reference (প্রতিটি রিপোজিটরিতে কী দেখতে হবে) | `golden-reference.md` | না (প্রয়োজনে নিজস্ব রিপোজিটরির নোট যোগ) |
 | Slash command (`/support:<id>`, `/support:<id>-prod-debug`) | `commands/support-command.md.tmpl` থেকে `sync-commands` দিয়ে তৈরি, `commands/support/<id>*.md` হিসেবে **রিপোজিটরিতে commit করা** (শুধু ওয়ার্কস্পেস-আপেক্ষিক পাথ) | না — প্রোফাইল বদলালে শুধু `sync-commands` চালিয়ে commit |
 | পেন্ডিং-টিকিট ভিউ | `view-sql` কমান্ড প্রোফাইল থেকে স্ক্রিপ্ট তৈরি করে | না (রিভিউ করে DBA চালাবেন) |
@@ -62,7 +62,7 @@ peopledesk-support-analyze --profile <id> setup
 - `doctor` দেখায় কোন প্রোফাইলের ক্রেডেনশিয়াল ব্যবহার হচ্ছে (`credentialSource`), password ও webhook মাস্ক করা।
 - Slash command ও replication prompt — দুটোই Claude-কে chat-এ ক্রেডেনশিয়াল চাওয়া বা নেওয়া নিষেধ করে।
 
-> **PeopleDesk-এর DB লগইন, webhook বা টোকেন অন্য কোনো টিম কখনো ব্যবহার করবে না।** এগুলো শুধু PeopleDesk টিমের মেশিনে থাকে, কোনো রিপোজিটরিতে নয় — অন্য টিম prompt চালালেও তাদের মেশিনে এগুলো পৌঁছায় না। কোনো সিক্রেট ভুল করে শেয়ার হলে সাথে সাথে rotate করুন।
+> **PeopleDesk-এর DB লগইন, webhook বা টোকেন অন্য কোনো টিম কখনো ব্যবহার করবে না।** এগুলো শুধু প্রাইভেট `peopledesk-kb`-এর `shared-credentials.json`-এ (মালিকের সিদ্ধান্ত 2026-10-28) আর PeopleDesk টিমের মেশিনে থাকে। তাই অন্য টিমকে `peopledesk-kb`-এর অ্যাক্সেস দেওয়া হয় না — তারা পায় `export-kit` প্যাকেজ, যেটিতে এই ফাইল কখনো থাকে না এবং export নিজেই প্রতিটি জানা ক্রেডেনশিয়াল মান খুঁজে নিশ্চিত করে। কোনো সিক্রেট ভুল করে শেয়ার হলে সাথে সাথে rotate করুন।
 
 ---
 
@@ -82,28 +82,52 @@ peopledesk-support-analyze --profile <id> setup
 
 ---
 
-## ৩. নতুন টিম চালু করার ধাপ
+## ৩. নতুন টিম চালু করার ধাপ — রিপোজিটরি অ্যাক্সেস ছাড়াই
 
-### কমান্ড কীভাবে সবার কাছে পৌঁছায়
+অন্য টিমকে আর `peopledesk-kb` বা অন্য কোনো PeopleDesk রিপোজিটরির অ্যাক্সেস দিতে হয় না। PeopleDesk টিম একটি **স্বয়ংসম্পূর্ণ প্যাকেজ** তৈরি করে পাঠায়; টিমটি সেটি unzip করে একটি প্রম্পট পেস্ট করলেই পুরো সেটআপ হয়ে যায়। ১০০টি টিম হলেও একই zip।
 
-কমান্ডগুলো আর প্রতিটি মেশিনে আলাদা করে তৈরি হয় না। সেগুলো `peopledesk-kb/scripts/support-analyst/commands/support/`-এ commit করা থাকে; installer সেগুলো ওয়ার্কস্পেস রুটের `.claude/commands/support/`-এ কপি করে, আর `./update-repos` প্রতিটি pull-এর পর সেই কপি হালনাগাদ করে। ফলে PeopleDesk-এর নতুন সদস্যের জন্য শুধু তিনটি কাজ: `./update-repos` (Windows: `update-repos.ps1`), `install.sh` (Windows: `install.ps1`), আর নিজের terminal-এ `setup` — বিস্তারিত [replication-prompt.md](replication-prompt.md)-এর Part A। Claude Code অবশ্যই **ওয়ার্কস্পেস রুটে** খুলতে হবে, কারণ কমান্ডের সব পাথ সেখান থেকে আপেক্ষিক।
+### PeopleDesk টিমের কাজ — প্যাকেজ তৈরি
 
-### পথ A — একই ওয়ার্কস্পেস কাঠামো (সুপারিশকৃত)
+```bash
+cd peopledesk-kb/scripts/support-analyst
+node bin/peopledesk-support-analyze.js export-kit --out ~/Desktop/support-analysis-agent-kit
+```
 
-টিমের নিজস্ব ওয়ার্কস্পেস ফোল্ডারে তাদের সব রিপোজিটরি পাশাপাশি থাকবে (যেমন `managerium-workspace/mgm-api`, `mgm-front`, ...), আর `peopledesk-kb` সেই ফোল্ডারের ভেতরেই clone করা থাকবে।
+- শুধু অনুমোদিত ফাইল কপি হয় (কোড, টেমপ্লেট, ডকুমেন্ট, টেস্ট, `profiles/_template.json`, installer)। **কখনো নয়:** কোনো প্রোডাক্ট প্রোফাইল, তৈরি করা কমান্ড, `shared-credentials.json`, লোকাল config বা preview।
+- এরপর প্যাকেজের প্রতিটি ফাইলে এই মেশিনে জানা প্রতিটি ক্রেডেনশিয়াল মান খোঁজা হয়; একটিও পাওয়া গেলে প্যাকেজ মুছে export ব্যর্থ হয় (`EXPORT_SECRET_FOUND`)।
+- `KIT-VERSION.json`-এ source commit থাকে — commit করা অবস্থা থেকে export করুন (`uncommittedChanges: false`)।
+- ফোল্ডারটি zip করে পাঠান, বা একটি শেয়ার্ড ড্রাইভে সর্বশেষ zip রাখুন।
 
-| # | কাজ | কে | কমান্ড / ফাইল |
-|---|---|---|---|
-| 1 | `peopledesk-kb` রিপোটি টিমের ওয়ার্কস্পেস রুটে clone করা (কপি বা fork নয় — একই kit সবার) | টিম লিড | `git clone … peopledesk-kb` |
-| 2 | প্রোডাক্ট রো যাচাই | টিম লিড | `peopledesk-support-analyze doctor` |
-| 3 | প্রোফাইল তৈরি — `profiles/_template.json` কপি করে `profiles/<id>.json`; প্রোডাক্ট কোড/আইডি, ভিউ নাম, `trackerTicketUrl` (`{ticketId}` সহ), **সব** রিপোজিটরি ও প্রতিটির ভূমিকা, আর ফিক্স PR-যোগ্য কোড রিপোজিটরিতে `github` + `baseBranch` + `verify` (প্রতিটি verify কমান্ড আগে একবার পরিষ্কার checkout-এ চালিয়ে দেখা — যে ধাপ কখনো পাস করে না, তা সব ফিক্স PR আটকে দেয়); তারপর `sync-commands` দিয়ে কমান্ড তৈরি ও `npm test` | টিম লিড | `profiles/managerium.json`, `commands/support/managerium*.md` |
-| 4 | প্রোফাইল থেকে ভিউ স্ক্রিপ্ট তৈরি, রিভিউ, DBA দিয়ে চালানো | টিম লিড + DBA | `peopledesk-support-analyze --profile <id> view-sql > view.sql` |
-| 5 | পুরনো টিকিট বাদ দিতে চাইলে backfill (প্রিভিউ → backup → আপডেট) | DBA | `sql/03-backfill-…sql` (প্রোডাক্ট কোড বদলে) |
-| 6 | প্রোফাইল ও তৈরি করা কমান্ড `peopledesk-kb`-এ PR হিসেবে জমা (PeopleDesk টিম রিভিউ করে merge করবে); তারপর প্রতিটি সদস্য ইনস্টল করেন — কমান্ড ওয়ার্কস্পেসের `.claude/commands/support/`-এ যায় | টিম লিড → প্রতিটি সদস্য | `bash peopledesk-kb/scripts/support-analyst/install.sh` (Windows: `install.ps1`) |
-| 7 | ক্রেডেনশিয়াল — নিজের terminal-এ `setup` চালিয়ে **নিজের** DB লগইন ও **টিমের নিজস্ব** webhook; `gh auth status` দিয়ে GitHub লগইন যাচাই | প্রতিটি সদস্য | `peopledesk-support-analyze --profile <id> setup` |
-| 8 | প্রথম রান — dry-run, preview দেখে মান যাচাই | টিম লিড | `/support:<id> 1 dry` |
-| 9 | লাইভ রান | টিম | `/support:<id> 5` |
-| 10 | পরে বিশ্লেষণ বদলালে (যেমন PR পরে খোলা হলো) — একই Google Chat থ্রেডে আপডেট | টিম | `save --update` (থ্রেড রেকর্ডে না থাকলে `--thread <মেসেজ লিংক>`) |
+### গ্রহীতা টিমের কাজ — তিন ধাপ
+
+| # | কাজ | কে |
+|---|---|---|
+| 1 | প্যাকেজ unzip (যেকোনো জায়গায়) | টিম লিড |
+| 2 | ওয়ার্কস্পেস রুটে (সব রিপোজিটরি পাশাপাশি) Claude Code খোলা | টিম লিড |
+| 3 | `SETUP-PROMPT.md`-এর `<…>` মান (প্রোডাক্ট নাম, প্রোফাইল id, Project Tracker URL, ফিক্স-PR রিপোজিটরি, টিম লিড) বসিয়ে পেস্ট | টিম লিড |
+
+এরপর Claude নিজে করে, আর যেখানে মানুষ লাগে সেখানে থামে:
+
+1. Node.js / git / `gh` যাচাই।
+2. কিট `<workspace>/<id>-support-kit/scripts/support-analyst`-এ বসানো — টিমের **নিজস্ব** git রিপোজিটরি।
+3. Installer (`install.sh` / `install.ps1`) ও `npm test` (সব টেস্ট পাস বাধ্যতামূলক)।
+4. রিপোজিটরি discovery, প্রতিটির build/lint/test একবার চালিয়ে যাচাই, আর git ইতিহাস থেকে টিম roster প্রস্তাব (টিম লিড অনুমোদন করেন)।
+5. **থামে** — টিম লিড নিজের terminal-এ `peopledesk-support-analyze --profile <id> setup` চালিয়ে নিজের DB লগইন, টিমের webhook ইত্যাদি দেন। তারপর `doctor` দিয়ে প্রোডাক্ট রো যাচাই।
+6. `profiles/<id>.json` তৈরি, `sync-commands`, আবার `npm test`।
+7. **থামে** — ভিউ স্ক্রিপ্ট DBA রিভিউ করে চালান।
+8. ঐচ্ছিক backfill (প্রিভিউ → অনুমোদন)।
+9. টিমের রিপোজিটরির নিয়ম `--no-verify` নিষেধ করলে লিখিত ব্যতিক্রম প্রস্তাব।
+10. কমান্ড ইনস্টল, VS Code reload, `/support:<id> 1 dry`।
+11. কিট রিপোজিটরি commit (অনুমোদনে), টিমের GitHub-এ push (অনুমোদনে), আর সহকর্মীদের জন্য `TEAM-SETUP.md` — তারা কিট clone করে এক প্রম্পটেই যুক্ত হন।
+12. লাইভ রান শুধু বললে।
+
+### আপডেট
+
+নতুন প্যাকেজ পাঠান; টিম একই `SETUP-PROMPT.md` আবার পেস্ট করে। Claude দুটি `KIT-VERSION.json` দেখিয়ে অনুমতি নেয়, টিমের প্রোফাইল, কমান্ড ও golden-reference সংযোজন রেখে বাকি কিট বদলায়, `sync-commands` ও টেস্ট চালায়, তারপর dry run।
+
+### PeopleDesk টিমের নতুন সদস্য
+
+কিছু বদলায়নি: `./update-repos` (Windows: `update-repos.ps1`), তারপর `install.sh` (Windows: `install.ps1`) — ক্রেডেনশিয়াল `shared-credentials.json` থেকে আসে, `setup` লাগে না (চাইলে ব্যক্তিগত লগইনের জন্য)। বিস্তারিত [replication-prompt.md](replication-prompt.md)-এর Part A। Claude Code অবশ্যই **ওয়ার্কস্পেস রুটে** খুলতে হবে।
 
 উদাহরণ — `setup` চালানোর পর এক মেশিনে দুই প্রোডাক্ট (প্রতিটির নিজস্ব লগইন ও webhook):
 
@@ -119,10 +143,6 @@ peopledesk-support-analyze --profile <id> setup
 ```
 
 > প্রোডাক্টের পরিচয় (কোড, আইডি, ভিউ, রিপোজিটরি) শুধু প্রোফাইল থেকে আসে — কনফিগের উপরের অংশে লিখলেও তা উপেক্ষিত হয়। ফলে এক প্রোডাক্টের webhook বা কোড অন্যটিতে ভুল করে যেতে পারে না। প্রতিটি প্রোফাইলের রান-লক আলাদা।
-
-### পথ B — Claude Code দিয়ে স্বয়ংক্রিয় সেটআপ
-
-টিমের ওয়ার্কস্পেসে Claude Code খুলে [replication-prompt.md](replication-prompt.md)-এর প্রম্পটটি পেস্ট করুন (প্রোডাক্টের নাম বসিয়ে)। Claude উপরের ধাপগুলো যাচাইসহ করবে এবং যেখানে মানুষের অনুমোদন দরকার (ভিউ তৈরি, backfill, webhook) সেখানে থেমে জিজ্ঞেস করবে।
 
 ---
 
@@ -161,4 +181,4 @@ PeopleDesk-এর প্রোফাইল নমুনা হিসেবে �
 | ভিউ, backfill, DB পারমিশন | DBA (রিভিউ করা স্ক্রিপ্ট) |
 | Webhook ও DB পাসওয়ার্ড | প্রতিটি টিম নিজে; শেয়ার করা হলে rotate |
 
-নতুন প্রয়োজন (যেমন নতুন সেকশন, নতুন enum) সব টিমের জন্য একসাথে আসে — তাই কোড এক জায়গায় রাখা হয়েছে, কপি করে আলাদা সংস্করণ বানানো নিরুৎসাহিত।
+নতুন প্রয়োজন (যেমন নতুন সেকশন, নতুন enum) সব টিমের জন্য একসাথে আসে — তাই কোডের উৎস এক জায়গায় (`peopledesk-kb`)। প্রতিটি টিমের কাছে কিটের একটি কপি থাকলেও তারা শুধু নিজেদের প্রোফাইল ও golden-reference নোট বদলায়; কোড পরিবর্তনের প্রস্তাব (টেস্টসহ) PeopleDesk টিমে পাঠায়, যা পরের প্যাকেজে সবার কাছে পৌঁছায়। এতে আপডেট সবসময় পরিষ্কারভাবে বসে।
